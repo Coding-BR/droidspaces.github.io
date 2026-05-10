@@ -51,11 +51,6 @@
           <a href="https://github.com/ravindu644/Droidspaces-OSS/blob/main/Documentation/Installation-Android.md"
             class="btn btn-ghost">Get Started →</a>
         </div>
-        <div class="hero-stats">
-          <div>
-            Website still under construction. Stay tuned.
-          </div>
-        </div>
       </div>
       <div class="terminal">
         <div class="terminal-bar">
@@ -82,6 +77,20 @@
           <div class="t-dim">root</div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- PHILOSOPHY -->
+  <section class="section">
+    <div class="container">
+      <div class="section-label">Philosophy</div>
+      <h2>"Set it up and forget it"</h2>
+      <p class="section-desc">
+        Droidspaces is built for real Linux work. Convert your Android device into a production-grade server with
+        unkillable daemons and standard systemd or OpenRC services. No hacks, no overhead, just bare-metal performance.
+      </p>
     </div>
   </section>
 
@@ -168,7 +177,7 @@
             </svg>
           </div>
           <h3>Network Isolation</h3>
-          <p>Host, NAT/Veth pairs (DHCP + DNS server + port forwarding), or air-gapped. Actually works on Android.</p>
+          <p>Host, NAT/Veth pairs, or air-gapped. Actually works on Android.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">
@@ -200,7 +209,7 @@
               <th>Category</th>
               <th>PRoot</th>
               <th>Chroot</th>
-              <th>LXC / Docker via Termux</th>
+              <th>LXC via Termux</th>
               <th class="hl">Droidspaces</th>
             </tr>
           </thead>
@@ -230,7 +239,7 @@
               <td>Init Support</td>
               <td>None</td>
               <td>None</td>
-              <td>LXC only</td>
+              <td>Full</td>
               <td class="hl">Full</td>
             </tr>
             <tr>
@@ -286,7 +295,7 @@
               <td>Binary Size</td>
               <td>10 MB plus</td>
               <td>Not Applicable</td>
-              <td>50 MB plus</td>
+              <td>10 MB plus</td>
               <td class="hl">300 KB</td>
             </tr>
           </tbody>
@@ -309,17 +318,19 @@
           <ul>
             <li>Kernel 3.10 or newer</li>
             <li>Rooted device (KernelSU, Magisk, or APatch)</li>
-            <li>Namespace support in kernel config</li>
-            <li>ARM64 or ARM32 architecture</li>
+            <li><a
+                href="https://github.com/ravindu644/Droidspaces-OSS/blob/main/Documentation/Kernel-Configuration.md">Custom
+                kernel configuration</a></li>
+            <li>x86_64, x86, ARM64, or ARMhf</li>
           </ul>
         </div>
         <div class="req-card">
           <h3>Linux</h3>
           <ul>
-            <li>Modern kernel with namespace support</li>
-            <li>Enabled by default on most distros</li>
-            <li>x86_64, ARM64, or ARM32</li>
-            <li>No root required for user namespaces</li>
+            <li>Kernel 3.10 or newer</li>
+            <li>Root access (no root required if droidspaces daemon is running)</li>
+            <li>No custom kernel required</li>
+            <li>x86_64, x86, ARM64, or ARMhf</li>
           </ul>
         </div>
       </div>
@@ -330,21 +341,23 @@
 
   <!-- CTA -->
   <section class="cta-section">
-    <div class="section-label">Get started</div>
-    <h2>Ready to run real containers?</h2>
-    <p>Download the binary or read the docs to get up and running in minutes.</p>
-    <div class="cta-btns">
-      <a href="https://github.com/ravindu644/Droidspaces-OSS/blob/main/Documentation/Installation-Android.md"
-        class="btn btn-primary">Documentation</a>
-      <a href="https://github.com/ravindu644/Droidspaces-OSS" class="btn btn-ghost">GitHub</a>
-      <a href="https://t.me/Droidspaces" class="btn btn-ghost">Telegram</a>
+    <div class="container">
+      <div class="section-label">Get started</div>
+      <h2>Ready to run real containers?</h2>
+      <p class="section-desc">Download the APK or read the docs to get up and running in minutes.</p>
+      <div class="cta-btns">
+        <a href="https://github.com/ravindu644/Droidspaces-OSS/releases/latest" class="btn btn-primary">Download APK</a>
+        <a href="https://github.com/ravindu644/Droidspaces-OSS" class="btn btn-ghost">GitHub</a>
+        <a href="https://t.me/Droidspaces" class="btn btn-ghost">Telegram</a>
+      </div>
     </div>
   </section>
 
   <footer>
     <p>&copy; 2026 Droidspaces &nbsp;·&nbsp; <a
         href="https://github.com/ravindu644/Droidspaces-OSS/blob/main/LICENSE">GPLv3</a> &nbsp;·&nbsp; by <a
-        href="https://github.com/ravindu644">ravindu644</a></p>
+        href="https://github.com/ravindu644">ravindu644</a> and <a
+        href="https://github.com/ravindu644/Droidspaces-OSS/graphs/contributors">contributors</a></p>
   </footer>
 
   <script>
