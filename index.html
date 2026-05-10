@@ -404,31 +404,7 @@
 
           timers.push(timer);
         });
-
-        const lastRevealAt = (lines.length - 1) * stepMs;
-        const clearAt = lastRevealAt + holdMs;
-
-        const clearTimer = setTimeout(() => {
-          hideAllLines();
-
-          const restartTimer = setTimeout(() => {
-            revealLines();
-          }, restartPauseMs);
-
-          timers.push(restartTimer);
-        }, clearAt);
-
-        timers.push(clearTimer);
       }
-
-      document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-          clearTimers();
-          return;
-        }
-
-        revealLines();
-      });
 
       revealLines();
     })();
