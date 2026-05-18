@@ -254,96 +254,109 @@
           <thead>
             <tr>
               <th>Category</th>
-              <th>PRoot</th>
-              <th>Chroot</th>
-              <th>LXC via Termux</th>
               <th class="hl">Droidspaces</th>
+              <th>LXC via Termux</th>
+              <th>Docker via Termux</th>
+              <th>Chroot</th>
+              <th>PRoot</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>Technology</td>
-              <td>Syscall Hooking</td>
-              <td>Path Redirection</td>
-              <td>Namespaces</td>
               <td class="hl">Namespaces</td>
+              <td>Namespaces</td>
+              <td>Namespaces</td>
+              <td>Path Redirection</td>
+              <td>Syscall Hooking</td>
             </tr>
             <tr>
               <td>Performance</td>
-              <td>Moderate</td>
-              <td>Native</td>
-              <td>Native</td>
               <td class="hl">Native</td>
+              <td>Native</td>
+              <td>Native</td>
+              <td>Native</td>
+              <td>Moderate</td>
             </tr>
             <tr>
               <td>Boot Time</td>
-              <td>Not Applicable</td>
-              <td>Not Applicable</td>
-              <td>750 to 2000 milliseconds on systemd</td>
               <td class="hl">150 to 750 milliseconds on systemd</td>
+              <td>750 to 2000 milliseconds on systemd</td>
+              <td>Not Applicable</td>
+              <td>Not Applicable</td>
+              <td>Not Applicable</td>
             </tr>
             <tr>
               <td>Init Support</td>
-              <td>None</td>
-              <td>None</td>
-              <td>Full</td>
               <td class="hl">Full</td>
+              <td>Full</td>
+              <td>None</td>
+              <td>None</td>
+              <td>None</td>
             </tr>
             <tr>
               <td>Persistence</td>
-              <td>Low</td>
-              <td>Low</td>
-              <td>Low</td>
               <td class="hl">Very High (Unkillable 2 daemons)</td>
+              <td>Low</td>
+              <td>Low</td>
+              <td>Low</td>
+              <td>Low</td>
             </tr>
             <tr>
               <td>Hardware Access</td>
-              <td>None</td>
-              <td>Manual Duct-Tape</td>
-              <td>Manual Duct-Tape</td>
               <td class="hl">Full (Single Toggle)</td>
+              <td>Manual Duct-Tape</td>
+              <td>Manual Duct-Tape</td>
+              <td>Manual Duct-Tape</td>
+              <td>None</td>
             </tr>
             <tr>
               <td>GPU Access</td>
-              <td>Moderate</td>
-              <td>Manual Duct-Tape</td>
-              <td>Manual Duct-Tape</td>
               <td class="hl">Full (Single Toggle)</td>
+              <td>Manual Duct-Tape</td>
+              <td>Manual Duct-Tape</td>
+              <td>Manual Duct-Tape</td>
+              <td>Moderate</td>
             </tr>
             <tr>
               <td>Termux-X11 Support</td>
-              <td>Moderate</td>
-              <td>Manual Duct-Tape</td>
-              <td>Manual Duct-Tape</td>
               <td class="hl">Full (Single Toggle)</td>
+              <td>Manual Duct-Tape</td>
+              <td>Manual Duct-Tape</td>
+              <td>Manual Duct-Tape</td>
+              <td>Moderate</td>
             </tr>
             <tr>
               <td>Privileged Mode</td>
-              <td>No</td>
-              <td>Full</td>
-              <td>Manual Duct-Tape</td>
               <td class="hl">Full, Customizable (Nomask, Nocaps, Noseccomp, etc.)</td>
+              <td>Manual Duct-Tape</td>
+              <td>Yes (--privileged)</td>
+              <td>Full</td>
+              <td>No</td>
             </tr>
             <tr>
               <td>Run at Boot</td>
-              <td>No</td>
-              <td>No</td>
-              <td>No</td>
               <td class="hl">Yes (Native init.rc/service.d)</td>
+              <td>No</td>
+              <td>No</td>
+              <td>No</td>
+              <td>No</td>
             </tr>
             <tr>
               <td>Portable rootfs.img Support</td>
+              <td class="hl">Yes</td>
               <td>No</td>
               <td>No</td>
               <td>No</td>
-              <td class="hl">Yes (Native Loop)</td>
+              <td>No</td>
             </tr>
             <tr>
               <td>Binary Size</td>
+              <td class="hl">300 KB</td>
               <td>10 MB plus</td>
+              <td>50 MB plus</td>
               <td>Not Applicable</td>
               <td>10 MB plus</td>
-              <td class="hl">300 KB</td>
             </tr>
           </tbody>
         </table>
@@ -368,7 +381,7 @@
             <li><a
                 href="https://github.com/ravindu644/Droidspaces-OSS/blob/main/Documentation/Kernel-Configuration.md">Custom
                 kernel configuration</a></li>
-            <li>x86_64, x86, ARM64, or ARMhf</li>
+            <li>ARM64, ARMhf, x86_64, or x86</li>
           </ul>
         </div>
         <div class="req-card">
@@ -377,7 +390,7 @@
             <li>Kernel 3.10 or newer</li>
             <li>Root access (no root required if droidspaces daemon is running)</li>
             <li>No custom kernel required</li>
-            <li>x86_64, x86, ARM64, or ARMhf</li>
+            <li>ARM64, ARMhf, x86_64, x86 or RISC-V 64</li>
           </ul>
         </div>
       </div>
