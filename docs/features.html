@@ -152,13 +152,17 @@
     }
     .table-wrap {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       margin-bottom: 1.5rem;
     }
     .table-wrap table {
+      width: max-content;
+      min-width: 100%;
       margin-bottom: 0;
     }
     .sidebar-content table {
-      width: 100%; border-collapse: collapse; font-size: 0.85rem;
+      width: max-content; min-width: 100%;
+      border-collapse: collapse; font-size: 0.85rem;
       margin-bottom: 1.5rem;
     }
     .sidebar-content th {
@@ -166,13 +170,13 @@
       text-transform: uppercase; letter-spacing: 0.06em;
       padding: 0.75rem 1rem; text-align: left; color: var(--muted);
       border-bottom: 1px solid var(--border); background: var(--bg3);
-      white-space: normal;
-      word-break: break-word; overflow-wrap: anywhere;
+      white-space: nowrap;
     }
     .sidebar-content td {
       padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
       color: var(--muted);
-      word-break: break-word;
+      white-space: normal; word-break: normal;
+      overflow-wrap: break-word; max-width: 300px;
     }
     .sidebar-content img {
       max-width: 100%; border-radius: 8px; border: 1px solid var(--border);
@@ -412,9 +416,12 @@
 <h3 id="network-namespace-isolation-net">Network Namespace Isolation (<code>--net</code>)</h3>
 <p>Droidspaces supports three networking modes that determine whether a network namespace (<code>CLONE_NEWNET</code>) is used:</p>
 <ol>
-<li><strong>Host Mode (<code>--net=host</code>) - Default</strong>: Droidspaces deliberately does <strong>not</strong> unshare the network namespace. The container shares the host's network stack. This greatly simplifies setup: containers get internet access immediately without virtual bridges, NAT, or firewall rules. On Android, where networking is already complex (cellular, Wi-Fi, VPN), this avoids a whole category of connectivity issues.</li>
-<li><strong>NAT Mode (<code>--net=nat</code>)</strong>: The container is placed in a private network namespace. It is connected to the host via a virtual bridge or veth pair, providing <strong>Pure Network Isolation</strong> while maintaining internet access through the host's upstream interfaces. Compatible with the vast majority of Android devices.</li>
-<li><strong>None Mode (<code>--net=none</code>)</strong>: The container is placed in a private, air-gapped network namespace with only the loopback interface enabled for maximum security.</li>
+<li><strong>Host Mode (<code>--net=host</code>) - Default</strong>: Droidspaces deliberately does <strong>not</strong> unshare the network namespace. The container shares the host's network stack. This greatly simplifies setup: containers get internet access immediately without virtual bridges, NAT, or firewall rules. On Android, where networking is already complex (cellular, Wi-Fi, VPN), this avoids a whole category of connectivity issues.
+</li>
+<li><strong>NAT Mode (<code>--net=nat</code>)</strong>: The container is placed in a private network namespace. It is connected to the host via a virtual bridge or veth pair, providing <strong>Pure Network Isolation</strong> while maintaining internet access through the host's upstream interfaces. Compatible with the vast majority of Android devices.
+</li>
+<li><strong>None Mode (<code>--net=none</code>)</strong>: The container is placed in a private, air-gapped network namespace with only the loopback interface enabled for maximum security.
+</li>
 </ol>
 <h3 id="how-it-compares-to-chroot">How It Compares to Chroot</h3>
 <p>A <code>chroot</code> only changes the apparent root directory for a process. It provides no process isolation, no mount isolation, no hostname isolation, and no IPC isolation. Any process inside a chroot shares the host's PID space, can see and signal other processes, and cannot run an init system like systemd.</p>
@@ -425,27 +432,40 @@
 <p>Without an init system, you're running individual processes in a chroot. You can't manage services, you can't use <code>systemctl</code>, you don't have journald for logging, and you don't have proper session management. It's a glorified shell.</p>
 <p>Droidspaces boots a real init system. When systemd starts as PID 1 inside the container:</p>
 <ul>
-<li>Services are managed via <code>systemctl start/stop/enable</code></li>
-<li>Logs are available via <code>journalctl</code></li>
-<li>User sessions work properly with <code>login</code>, <code>su</code>, and <code>sudo</code></li>
-<li>Targets and dependencies are resolved correctly</li>
-<li>Timer units, socket activation, and all other systemd features work</li>
+<li>Services are managed via <code>systemctl start/stop/enable</code>
+</li>
+<li>Logs are available via <code>journalctl</code>
+</li>
+<li>User sessions work properly with <code>login</code>, <code>su</code>, and <code>sudo</code>
+</li>
+<li>Targets and dependencies are resolved correctly
+</li>
+<li>Timer units, socket activation, and all other systemd features work
+</li>
 </ul>
 <h3 id="how-droidspaces-enables-it">How Droidspaces Enables It</h3>
 <p>Three things are required for systemd to function inside a container:</p>
 <ol>
-<li><strong>PID 1:</strong> The init process must be PID 1. Droidspaces achieves this with a PID namespace (<code>CLONE_NEWPID</code>) followed by a fork, making the container's init the first process in its namespace.</li>
-<li><strong>Container detection:</strong> Systemd needs to know it's running inside a container. Droidspaces writes <code>droidspaces</code> to <code>/run/systemd/container</code> and sets the <code>container=droidspaces</code> environment variable.</li>
-<li><strong>Cgroup access:</strong> Systemd requires write access to its cgroup hierarchy to create scopes and slices. Droidspaces provides this through per-container cgroup trees (see <a href="#cgroup-isolation" rel="noopener noreferrer">Cgroup Isolation</a>).</li>
+<li><strong>PID 1:</strong> The init process must be PID 1. Droidspaces achieves this with a PID namespace (<code>CLONE_NEWPID</code>) followed by a fork, making the container's init the first process in its namespace.
+</li>
+<li><strong>Container detection:</strong> Systemd needs to know it's running inside a container. Droidspaces writes <code>droidspaces</code> to <code>/run/systemd/container</code> and sets the <code>container=droidspaces</code> environment variable.
+</li>
+<li><strong>Cgroup access:</strong> Systemd requires write access to its cgroup hierarchy to create scopes and slices. Droidspaces provides this through per-container cgroup trees (see <a href="#cgroup-isolation" rel="noopener noreferrer">Cgroup Isolation</a>).
+</li>
 </ol>
 <h3 id="supported-init-systems">Supported Init Systems</h3>
 <p>Droidspaces is theoretically compatible with <strong>any init system</strong> that can run as PID 1, including:</p>
 <ul>
-<li><strong>systemd</strong> (most Linux distributions)</li>
-<li><strong>OpenRC</strong> (Alpine Linux, Gentoo)</li>
-<li><strong>runit</strong> (Void Linux, Devuan)</li>
-<li><strong>s6-init</strong> (Alpine, various containers)</li>
-<li><strong>SysVinit</strong> (Debian, Devuan)</li>
+<li><strong>systemd</strong> (most Linux distributions)
+</li>
+<li><strong>OpenRC</strong> (Alpine Linux, Gentoo)
+</li>
+<li><strong>runit</strong> (Void Linux, Devuan)
+</li>
+<li><strong>s6-init</strong> (Alpine, various containers)
+</li>
+<li><strong>SysVinit</strong> (Debian, Devuan)
+</li>
 </ul>
 <p>The init binary is strictly expected at <code>/sbin/init</code>. If this binary is missing or not executable, Droidspaces will fail to boot the container to ensure that services and session management function as expected.</p>
 <hr>
@@ -455,17 +475,24 @@
 <h3 id="how-it-works">How It Works</h3>
 <p>Droidspaces uses <strong>OverlayFS</strong>, a union filesystem built into the Linux kernel:</p>
 <ul>
-<li><strong>Lower layer:</strong> The original rootfs (mounted read-only if using the rootfs.img mode)</li>
-<li><strong>Upper layer:</strong> A tmpfs-backed directory that captures all writes</li>
-<li><strong>Merged view:</strong> The container sees a unified filesystem where reads come from the lower layer and writes go to the upper layer</li>
+<li><strong>Lower layer:</strong> The original rootfs (mounted read-only if using the rootfs.img mode)
+</li>
+<li><strong>Upper layer:</strong> A tmpfs-backed directory that captures all writes
+</li>
+<li><strong>Merged view:</strong> The container sees a unified filesystem where reads come from the lower layer and writes go to the upper layer
+</li>
 </ul>
 <p>When the container stops, the upper layer (in RAM) is discarded. The original rootfs remains untouched.</p>
 <h3 id="use-cases">Use Cases</h3>
 <ul>
-<li><strong>Testing:</strong> Install packages, modify configurations, and verify changes without committing anything</li>
-<li><strong>Development:</strong> Spin up a clean environment for each build</li>
-<li><strong>Security:</strong> Guaranteed clean state on every boot</li>
-<li><strong>Experimentation:</strong> Break things without consequences</li>
+<li><strong>Testing:</strong> Install packages, modify configurations, and verify changes without committing anything
+</li>
+<li><strong>Development:</strong> Spin up a clean environment for each build
+</li>
+<li><strong>Security:</strong> Guaranteed clean state on every boot
+</li>
+<li><strong>Experimentation:</strong> Break things without consequences
+</li>
 </ul>
 <h3 id="usage">Usage</h3>
 <div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code># Volatile container from a directory
@@ -491,10 +518,14 @@ droidspaces --name=test --rootfs-img=/path/to/rootfs.img --volatile start
 <div class="callout callout-note"><strong class="callout-title">NOTE</strong> This information is based on current developer understanding of systemd's behavior in Droidspaces and may require further verification.</div>
 <p>Droidspaces handles this with a "dynamic hole-punching" technique:</p>
 <ol>
-<li><strong>Pinning Subsystems</strong>: All <code>/sys</code> subdirectories are self-bind-mounted to preserve read-write access to individual hardware subsystems.</li>
-<li><strong>Read-Only Remount</strong>: The top-level <code>/sys</code> is remounted read-only.</li>
-<li><strong>Container Identification</strong>: systemd detects the read-only <code>/sys</code>, correctly identifies the container environment, and falls back to container-native console management.</li>
-<li><strong>Hardware Access</strong>: Individual hardware subsystems remain fully accessible via the pinned sub-mounts created in step 1.</li>
+<li><strong>Pinning Subsystems</strong>: All <code>/sys</code> subdirectories are self-bind-mounted to preserve read-write access to individual hardware subsystems.
+</li>
+<li><strong>Read-Only Remount</strong>: The top-level <code>/sys</code> is remounted read-only.
+</li>
+<li><strong>Container Identification</strong>: systemd detects the read-only <code>/sys</code>, correctly identifies the container environment, and falls back to container-native console management.
+</li>
+<li><strong>Hardware Access</strong>: Individual hardware subsystems remain fully accessible via the pinned sub-mounts created in step 1.
+</li>
 </ol>
 <h3 id="usage">Usage</h3>
 <div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>droidspaces --name=gpu-test --rootfs=/path/to/rootfs --hw-access start
@@ -502,16 +533,21 @@ droidspaces --name=test --rootfs-img=/path/to/rootfs.img --volatile start
 <h3 id="automatic-gpu-group-setup">Automatic GPU Group Setup</h3>
 <p>When <code>--hw-access</code> is enabled, Droidspaces automatically:</p>
 <ol>
-<li><strong>Scans host GPU devices</strong> - Before <code>pivot_root</code>, it probes ~40 known GPU device paths (<code>/dev/dri/*</code>, <code>/dev/mali*</code>, <code>/dev/kgsl-3d0</code>, <code>/dev/nvidia*</code>, etc.) and collects their group IDs via <code>stat()</code>. <strong>Dangerous nodes like <code>/dev/dri/card*</code> are explicitly skipped</strong> to prevent host kernel panics, as these nodes are restricted to the host's display manager.</li>
-<li><strong>Creates matching groups</strong> - After <code>pivot_root</code>, it appends entries like <code>gpu_<GID>:x:<GID>:root</code> to the container's <code>/etc/group</code>. The container's root user is automatically added to each group.</li>
-<li><strong>Idempotent restarts</strong> - On container restart, existing groups are detected and skipped (no duplicate entries).</li>
+<li><strong>Scans host GPU devices</strong> - Before <code>pivot_root</code>, it probes ~40 known GPU device paths (<code>/dev/dri/*</code>, <code>/dev/mali*</code>, <code>/dev/kgsl-3d0</code>, <code>/dev/nvidia*</code>, etc.) and collects their group IDs via <code>stat()</code>. <strong>Dangerous nodes like <code>/dev/dri/card*</code> are explicitly skipped</strong> to prevent host kernel panics, as these nodes are restricted to the host's display manager.
+</li>
+<li><strong>Creates matching groups</strong> - After <code>pivot_root</code>, it appends entries like <code>gpu_<GID>:x:<GID>:root</code> to the container's <code>/etc/group</code>. The container's root user is automatically added to each group.
+</li>
+<li><strong>Idempotent restarts</strong> - On container restart, existing groups are detected and skipped (no duplicate entries).
+</li>
 </ol>
 <p>This eliminates the need for manual <code>groupadd</code>/<code>usermod</code> commands inside the container, while ensuring the host's kernel stability by avoiding restricted hardware paths.</p>
 <h3 id="x11-socket-mounting">X11 Socket Mounting</h3>
 <p>For GUI application support, Droidspaces automatically bind-mounts the X11 socket directory:</p>
 <ul>
-<li><strong>Android (Termux X11):</strong> Detects and mounts <code>/data/data/com.termux/files/usr/tmp/.X11-unix</code></li>
-<li><strong>Desktop Linux:</strong> Mounts <code>/tmp/.X11-unix</code> via <code>/proc/1/root/tmp/.X11-unix</code></li>
+<li><strong>Android (Termux X11):</strong> Detects and mounts <code>/data/data/com.termux/files/usr/tmp/.X11-unix</code>
+</li>
+<li><strong>Desktop Linux:</strong> Mounts <code>/tmp/.X11-unix</code> via <code>/proc/1/root/tmp/.X11-unix</code>
+</li>
 </ul>
 <div class="callout callout-tip"><strong class="callout-title">TIP</strong> X11 support can be enabled independently using the <code>--termux-x11</code> (<code>-X</code>) flag. This is the recommended way to use GUI applications on Android if you do not need full GPU/hardware access, as it preserves a higher level of isolation.</div>
 <p>After starting the container, set <code>DISPLAY=:0</code> inside the container to use the X11 display.</p>
@@ -552,8 +588,10 @@ droidspaces --name=test --rootfs-img=/path/to/rootfs.img --volatile start
 </code></pre></div>
 <h3 id="limits">Limits</h3>
 <ul>
-<li>Destination must be an <strong>absolute path</strong></li>
-<li>Path traversal (<code>..</code>) in destinations is <strong>rejected</strong> for security</li>
+<li>Destination must be an <strong>absolute path</strong>
+</li>
+<li>Path traversal (<code>..</code>) in destinations is <strong>rejected</strong> for security
+</li>
 </ul>
 <h3 id="automatic-directory-creation">Automatic Directory Creation</h3>
 <p>If the destination directory doesn't exist inside the rootfs, Droidspaces creates it automatically using <code>mkdir -p</code>.</p>
@@ -595,10 +633,14 @@ droidspaces --name=test --rootfs-img=/path/to/rootfs.img --volatile start
 <h3 id="how-it-works">How It Works</h3>
 <p>When you use <code>--rootfs-img</code>:</p>
 <ol>
-<li><strong>Filesystem check:</strong> Droidspaces runs <code>e2fsck -f -y</code> on the image to ensure integrity</li>
-<li><strong>SELinux context:</strong> On Android, applies the <code>vold_data_file</code> SELinux context to prevent silent I/O denials</li>
-<li><strong>Loop mount:</strong> The image is mounted at <code>/mnt/Droidspaces/<name></code></li>
-<li><strong>Retry logic:</strong> On kernel 4.14, mounts may fail due to stale loop device state. Droidspaces retries up to 3 times with <code>sync()</code> and settle delays.</li>
+<li><strong>Filesystem check:</strong> Droidspaces runs <code>e2fsck -f -y</code> on the image to ensure integrity
+</li>
+<li><strong>SELinux context:</strong> On Android, applies the <code>vold_data_file</code> SELinux context to prevent silent I/O denials
+</li>
+<li><strong>Loop mount:</strong> The image is mounted at <code>/mnt/Droidspaces/<name></code>
+</li>
+<li><strong>Retry logic:</strong> On kernel 4.14, mounts may fail due to stale loop device state. Droidspaces retries up to 3 times with <code>sync()</code> and settle delays.
+</li>
 </ol>
 <h3 id="usage">Usage</h3>
 <div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code># Image-based container (--name is mandatory)
@@ -620,8 +662,10 @@ droidspaces --name=ubuntu --rootfs-img=/path/to/rootfs.img --volatile start
 <h3 id="cgroup-v1-and-v2-support">Cgroup v1 and v2 Support</h3>
 <p>Droidspaces supports both cgroup versions:</p>
 <ul>
-<li><strong>Cgroup v2 (unified):</strong> Used by modern distributions. Mounted as a single hierarchy.</li>
-<li><strong>Cgroup v1 (legacy):</strong> Used by older distributions. Droidspaces handles comounted controllers (e.g., <code>cpu,cpuacct</code>) and creates symlinks for secondary names in older kernels or <code>--force-cgroupv1</code> mode.</li>
+<li><strong>Cgroup v2 (unified):</strong> Used by modern distributions. Mounted as a single hierarchy.
+</li>
+<li><strong>Cgroup v1 (legacy):</strong> Used by older distributions. Droidspaces handles comounted controllers (e.g., <code>cpu,cpuacct</code>) and creates symlinks for secondary names in older kernels or <code>--force-cgroupv1</code> mode.
+</li>
 </ul>
 <h3 id="forcing-legacy-cgroup-v1-force-cgroupv1">Forcing Legacy Cgroup V1 (<code>--force-cgroupv1</code>)</h3>
 <p>On legacy Android kernels (3.18, 4.4, or 4.9), the host system may either lack Cgroup v2 support entirely or provide a partial implementation without the essential controllers (CPU, memory, etc.) required by modern <code>systemd</code>. This inconsistency often causes <code>systemd</code> to misidentify the environment, leading to critical boot failures.</p>
@@ -648,38 +692,53 @@ droidspaces --name=ubuntu --rootfs-img=/path/to/rootfs.img --volatile start
 <h3 id="1-android-network-hardware-groups">1. Android Network & Hardware Groups</h3>
 <p>Older Android kernels restrict network socket creation and direct hardware access to specific, hardcoded Group IDs (GIDs). Droidspaces maps and configures these groups inside the container's rootfs:</p>
 <ul>
-<li><strong>GID Mapping</strong>: Appends Android-specific groups to <code>/etc/group</code>:</li>
-<li><code>aid_inet</code> (3003): Allows internet access.</li>
-<li><code>aid_net_raw</code> (3004): Allows raw socket creation (e.g., for <code>ping</code>).</li>
-<li><code>aid_net_admin</code> (3005): Allows network administration.</li>
-<li><strong>Permissions Assignment</strong>: Adds the container's <code>root</code> user to the <code>aid_inet</code>, <code>aid_net_raw</code>, <code>input</code>, <code>video</code>, and <code>tty</code> groups.</li>
-<li><strong>Package Manager Fix</strong>: Configures the Debian/Ubuntu <code>_apt</code> user to use <code>aid_inet</code> as its primary group, allowing packages to be installed and updated without permission errors.</li>
-<li><strong>User Automation</strong>: Modifies <code>/etc/adduser.conf</code> so any newly created user automatically inherits these groups.</li>
+<li><strong>GID Mapping</strong>: Appends Android-specific groups to <code>/etc/group</code>:
+<ul>
+<li><code>aid_inet</code> (3003): Allows internet access.
+</li>
+<li><code>aid_net_raw</code> (3004): Allows raw socket creation (e.g., for <code>ping</code>).
+</li>
+<li><code>aid_net_admin</code> (3005): Allows network administration.
+</li>
+</ul>
+</li>
+<li><strong>Permissions Assignment</strong>: Adds the container's <code>root</code> user to the <code>aid_inet</code>, <code>aid_net_raw</code>, <code>input</code>, <code>video</code>, and <code>tty</code> groups.
+</li>
+<li><strong>Package Manager Fix</strong>: Configures the Debian/Ubuntu <code>_apt</code> user to use <code>aid_inet</code> as its primary group, allowing packages to be installed and updated without permission errors.
+</li>
+<li><strong>User Automation</strong>: Modifies <code>/etc/adduser.conf</code> so any newly created user automatically inherits these groups.
+</li>
 </ul>
 <h3 id="2-udev-trigger-service-overrides">2. Udev Trigger & Service Overrides</h3>
 <p>Standard Linux distributions run <code>udevadm trigger</code> to coldplug hardware devices during boot. Triggering all subsystems simultaneously on an Android device can cause the kernel to panic.</p>
 <ul>
-<li><strong>Hardware Access Guards</strong>: Since udev services are only useful when hardware access is explicitly enabled, Droidspaces injects a drop-in <code>ExecCondition</code> override that prevents <code>systemd-udevd.service</code>, <code>systemd-udev-trigger.service</code>, and <code>systemd-udev-settle.service</code> from starting unless the container is configured with hardware access (<code>enable_hw_access=1</code>):</li>
-</ul>
+<li><strong>Hardware Access Guards</strong>: Since udev services are only useful when hardware access is explicitly enabled, Droidspaces injects a drop-in <code>ExecCondition</code> override that prevents <code>systemd-udevd.service</code>, <code>systemd-udev-trigger.service</code>, and <code>systemd-udev-settle.service</code> from starting unless the container is configured with hardware access (<code>enable_hw_access=1</code>):
 <div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>[Service]
 ExecCondition=
 ExecCondition=/bin/sh -c "grep -q 'enable_hw_access=1' /run/droidspaces/container.config"
 </code></pre></div>
-<ul>
-<li><strong>Safe Udev Trigger</strong>: Instead of scanning everything, Droidspaces overrides the default <code>systemd-udev-trigger.service</code> using a drop-in configuration. If hardware access is enabled, this limits the trigger to a strictly defined, safe subset of subsystems:</li>
-</ul>
+</li>
+<li><strong>Safe Udev Trigger</strong>: Instead of scanning everything, Droidspaces overrides the default <code>systemd-udev-trigger.service</code> using a drop-in configuration. If hardware access is enabled, this limits the trigger to a strictly defined, safe subset of subsystems:
 <div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>[Service]
 ExecStart=
 ExecStart=-/usr/bin/udevadm trigger --subsystem-match=usb --subsystem-match=block --subsystem-match=input --subsystem-match=tty --subsystem-match=net
 </code></pre></div>
-<p>  This allows the container to dynamically detect new USB drives, keyboards, and network interfaces without risking a host crash. - <strong>Read-Only Path Fix</strong>: Overrides <code>ConditionPathIsReadWrite</code> for all udev units to prevent failures in environments where key system directories are mounted read-only.</p>
+<p>This allows the container to dynamically detect new USB drives, keyboards, and network interfaces without risking a host crash.</p>
+</li>
+<li><strong>Read-Only Path Fix</strong>: Overrides <code>ConditionPathIsReadWrite</code> for all udev units to prevent failures in environments where key system directories are mounted read-only.
+</li>
+</ul>
 <h3 id="3-optimizing-systemd-logging">3. Optimizing systemd & Logging</h3>
 <p>The Android kernel is notoriously verbose. Without tuning, standard <code>journald</code> setups would read host kernel messages and generate gigabytes of logs, quickly filling up the device's internal storage:</p>
 <ul>
-<li><strong>Journald Adjustments</strong>: Disables reading kernel messages and system auditing (<code>ReadKMsg=no</code>, <code>Audit=no</code>) in <code>journald.conf</code> to prevent the container from hoarding system-wide kernel logs.</li>
-<li><strong>Volatile Storage</strong>: Configures systemd journal logs to store in-memory only (<code>Storage=volatile</code>) and enforces strict maximum size constraints (200MB) to prevent constant writes from wearing out and filling the device's physical internal flash storage.</li>
-<li><strong>Service Masking</strong>: Masks <code>systemd-networkd-wait-online.service</code> to prevent boot delays, and <code>systemd-journald-audit.socket</code> to prevent systemd deadlocks in old kernels like 4.9.</li>
-<li><strong>Power Key Handling</strong>: Instructs <code>systemd-logind</code> to ignore host power and suspend key events so the container does not attempt to handle host power state transitions.</li>
+<li><strong>Journald Adjustments</strong>: Disables reading kernel messages and system auditing (<code>ReadKMsg=no</code>, <code>Audit=no</code>) in <code>journald.conf</code> to prevent the container from hoarding system-wide kernel logs.
+</li>
+<li><strong>Volatile Storage</strong>: Configures systemd journal logs to store in-memory only (<code>Storage=volatile</code>) and enforces strict maximum size constraints (200MB) to prevent constant writes from wearing out and filling the device's physical internal flash storage.
+</li>
+<li><strong>Service Masking</strong>: Masks <code>systemd-networkd-wait-online.service</code> to prevent boot delays, and <code>systemd-journald-audit.socket</code> to prevent systemd deadlocks in old kernels like 4.9.
+</li>
+<li><strong>Power Key Handling</strong>: Instructs <code>systemd-logind</code> to ignore host power and suspend key events so the container does not attempt to handle host power state transitions.
+</li>
 </ul>
 <h3 id="4-nat-mode-network-guards">4. NAT Mode Network Guards</h3>
 <p>Under Host networking mode, running network managers like <code>NetworkManager</code> or <code>systemd-networkd</code> inside the container can conflict with the Android host's routing tables and break cellular/Wi-Fi connectivity.</p>
@@ -690,8 +749,10 @@ ExecCondition=/bin/sh -c "grep -q 'net_mode=nat' /run/droidspaces/container.conf
 </code></pre></div>
 <h3 id="5-storage-and-dhcp-configuration">5. Storage and DHCP Configuration</h3>
 <ul>
-<li><strong>systemd-networkd Config</strong>: Automatically configures <code>10-eth-dhcp.network</code> to enable DHCP and IPv6 route acceptance for any <code>eth*</code> interfaces.</li>
-<li><strong>Logrotate Limit</strong>: Enforces a <code>maxsize 50M</code> limit in <code>/etc/logrotate.conf</code> to prevent logs from consuming excessive disk space over time.</li>
+<li><strong>systemd-networkd Config</strong>: Automatically configures <code>10-eth-dhcp.network</code> to enable DHCP and IPv6 route acceptance for any <code>eth*</code> interfaces.
+</li>
+<li><strong>Logrotate Limit</strong>: Enforces a <code>maxsize 50M</code> limit in <code>/etc/logrotate.conf</code> to prevent logs from consuming excessive disk space over time.
+</li>
 </ul>
 <div class="doc-nav-buttons"><a href="installation-linux.html" class="doc-nav-btn doc-nav-prev">← Linux Installation Guide</a><a href="gpu-acceleration.html" class="doc-nav-btn doc-nav-next">Droidspaces GPU Acceleration Guide →</a></div>
       <p class="doc-copyright">&copy; 2026 Droidspaces &nbsp;·&nbsp; <a href="https://github.com/ravindu644/Droidspaces-OSS/blob/main/LICENSE" rel="noopener noreferrer">GPLv3</a> &nbsp;·&nbsp; by <a href="https://github.com/ravindu644" rel="noopener noreferrer">ravindu644</a> and <a href="https://github.com/ravindu644/Droidspaces-OSS/graphs/contributors" rel="noopener noreferrer">contributors</a>

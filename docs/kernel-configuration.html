@@ -152,13 +152,17 @@
     }
     .table-wrap {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       margin-bottom: 1.5rem;
     }
     .table-wrap table {
+      width: max-content;
+      min-width: 100%;
       margin-bottom: 0;
     }
     .sidebar-content table {
-      width: 100%; border-collapse: collapse; font-size: 0.85rem;
+      width: max-content; min-width: 100%;
+      border-collapse: collapse; font-size: 0.85rem;
       margin-bottom: 1.5rem;
     }
     .sidebar-content th {
@@ -166,13 +170,13 @@
       text-transform: uppercase; letter-spacing: 0.06em;
       padding: 0.75rem 1rem; text-align: left; color: var(--muted);
       border-bottom: 1px solid var(--border); background: var(--bg3);
-      white-space: normal;
-      word-break: break-word; overflow-wrap: anywhere;
+      white-space: nowrap;
     }
     .sidebar-content td {
       padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
       color: var(--muted);
-      word-break: break-word;
+      white-space: normal; word-break: normal;
+      overflow-wrap: break-word; max-width: 300px;
     }
     .sidebar-content img {
       max-width: 100%; border-radius: 8px; border: 1px solid var(--border);
@@ -397,13 +401,20 @@ https://github.com/ravindu644/Android-Kernel-Tutorials</div>
 <hr>
 <h3 id="quick-navigation">Quick Navigation</h3>
 <ul>
-<li><a href="#overview" rel="noopener noreferrer">Overview</a></li>
-<li><a href="#non-gki" rel="noopener noreferrer">Configuring Non-GKI Kernels</a></li>
-<li><a href="#gki" rel="noopener noreferrer">Configuring GKI Kernels</a></li>
-<li><a href="#testing" rel="noopener noreferrer">Testing Your Kernel</a></li>
-<li><a href="#versions" rel="noopener noreferrer">Recommended Kernel Versions</a></li>
-<li><a href="#nested" rel="noopener noreferrer">Nested Containers</a></li>
-<li><a href="#resources" rel="noopener noreferrer">Additional Resources</a></li>
+<li><a href="#overview" rel="noopener noreferrer">Overview</a>
+</li>
+<li><a href="#non-gki" rel="noopener noreferrer">Configuring Non-GKI Kernels</a>
+</li>
+<li><a href="#gki" rel="noopener noreferrer">Configuring GKI Kernels</a>
+</li>
+<li><a href="#testing" rel="noopener noreferrer">Testing Your Kernel</a>
+</li>
+<li><a href="#versions" rel="noopener noreferrer">Recommended Kernel Versions</a>
+</li>
+<li><a href="#nested" rel="noopener noreferrer">Nested Containers</a>
+</li>
+<li><a href="#resources" rel="noopener noreferrer">Additional Resources</a>
+</li>
 </ul>
 <hr>
 <h2 id="overview">Overview</h2>
@@ -522,9 +533,12 @@ CONFIG_NETFILTER_XT_TARGET_NFLOG=y
 </code></pre></div>
 <h3 id="step-4-build-flash-and-test">Step 4: Build, Flash and Test</h3>
 <ol>
-<li>Save the configuration blocks above as <code>.config</code> fragments or merge them into your defconfig.</li>
-<li>Compile and flash the kernel to your device.</li>
-<li>Verify using the Droidspaces app <strong>Settings -> Requirements -> Check Requirements</strong>.</li>
+<li>Save the configuration blocks above as <code>.config</code> fragments or merge them into your defconfig.
+</li>
+<li>Compile and flash the kernel to your device.
+</li>
+<li>Verify using the Droidspaces app <strong>Settings -> Requirements -> Check Requirements</strong>.
+</li>
 </ol>
 <hr>
 <h2 id="gki">Configuring GKI Kernels</h2>
@@ -535,18 +549,21 @@ CONFIG_NETFILTER_XT_TARGET_NFLOG=y
 <div class="callout callout-important"><strong class="callout-title">IMPORTANT</strong> <strong>These patches are NOT OPTIONAL.</strong> You <strong>MUST</strong> apply the correct kABI fix patches for your kernel version. Skipping these patches will cause an immediate bootloop upon enabling <code>CONFIG_SYSVIPC</code>, <code>CONFIG_IPC_NS</code> or <code>CONFIG_POSIX_MQUEUE</code>.</div>
 <p><strong>For ALL Kernels BELOW 6.12 (5.4, 5.10, 5.15, 6.1, 6.6):</strong></p>
 <ul>
-<li>Apply the <code>SYSVIPC</code> kABI fix from <a href="./resources/kernel-patches/GKI/below-kernel-6.12/" rel="noopener noreferrer">assets/resources/kernel-patches/GKI/below-kernel-6.12/</a>:</li>
+<li>Apply the <code>SYSVIPC</code> kABI fix from <a href="./resources/kernel-patches/GKI/below-kernel-6.12/" rel="noopener noreferrer">assets/resources/kernel-patches/GKI/below-kernel-6.12/</a>:
+</li>
 </ul>
 <div class="callout callout-tip"><strong class="callout-title">TIP</strong> The <a href="./resources/kernel-patches/GKI/below-kernel-6.12/001.GKI-below-6.12-fix_sysvipc_kabi_6_7_8.patch" rel="noopener noreferrer"><code>001.GKI-below-6.12-fix_sysvipc_kABI_6_7_8.patch</code></a> is recommended.
 If this patch causes a bootloop, try the alternative patches from the same folder (e.g., <code>1_2_3</code> or <code>3_4_5</code>).</div>
 <p><strong>For Kernels 5.10 and BELOW ONLY:</strong></p>
 <ul>
-<li>You <strong>MUST ALSO</strong> apply the <code>POSIX_MQUEUE</code> kABI fix:</li>
+<li>You <strong>MUST ALSO</strong> apply the <code>POSIX_MQUEUE</code> kABI fix:
+<p><a href="./resources/kernel-patches/GKI/below-kernel-6.12/002.5.10_or_lower_use_android_abi_padding_for_posix_mqueue.patch" rel="noopener noreferrer">assets/resources/kernel-patches/GKI/below-kernel-6.12/002.5.10_or_lower_use_android_abi_padding_for_posix_mqueue.patch</a></p>
+</li>
 </ul>
-<p>  <a href="./resources/kernel-patches/GKI/below-kernel-6.12/002.5.10_or_lower_use_android_abi_padding_for_posix_mqueue.patch" rel="noopener noreferrer">assets/resources/kernel-patches/GKI/below-kernel-6.12/002.5.10_or_lower_use_android_abi_padding_for_posix_mqueue.patch</a></p>
 <p><strong>For Kernels 6.12 and ABOVE:</strong></p>
 <ul>
-<li>Apply the patch from <a href="./resources/kernel-patches/GKI/kernel-6.12/001.GKI-6.12-or-above-fix_sysvipc_kabi.patch" rel="noopener noreferrer">assets/resources/kernel-patches/GKI/kernel-6.12/001.GKI-6.12-or-above-fix_sysvipc_kabi.patch</a>.</li>
+<li>Apply the patch from <a href="./resources/kernel-patches/GKI/kernel-6.12/001.GKI-6.12-or-above-fix_sysvipc_kabi.patch" rel="noopener noreferrer">assets/resources/kernel-patches/GKI/kernel-6.12/001.GKI-6.12-or-above-fix_sysvipc_kabi.patch</a>.
+</li>
 </ul>
 <p><strong>How to apply the patches:</strong></p>
 <div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code># Apply each required patch for your kernel version
@@ -601,24 +618,37 @@ CONFIG_TMPFS_XATTR=y
 <h2 id="testing">Testing Your Kernel</h2>
 <h3 id="1-run-the-requirements-check">1. Run the Requirements Check</h3>
 <ul>
-<li><strong>In the app</strong>: Go to <strong>Settings</strong> (gear icon) -> <strong>Requirements</strong> -> <strong>Check Requirements</strong>.</li>
-<li><strong>In a terminal</strong>: Run:</li>
+<li><strong>In the app</strong>: Go to <strong>Settings</strong> (gear icon) -> <strong>Requirements</strong> -> <strong>Check Requirements</strong>.
+</li>
+<li><strong>In a terminal</strong>: Run:
+</li>
 </ul>
 <div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>su -c droidspaces check
 </code></pre></div>
 <p>This checks for:</p>
 <ul>
-<li>Root access</li>
-<li>Kernel version (minimum 3.18)</li>
-<li>PID, MNT, UTS, IPC namespaces</li>
-<li>Network namespace (optional, required for NAT/None modes)</li>
-<li>Cgroup namespace (optional, for modern cgroup isolation)</li>
-<li>devtmpfs support</li>
-<li>OverlayFS support (optional, for volatile mode)</li>
-<li>VETH and Bridge support (optional, for NAT mode)</li>
-<li>PTY/devpts support</li>
-<li>Loop device support</li>
-<li>ext4 support</li>
+<li>Root access
+</li>
+<li>Kernel version (minimum 3.18)
+</li>
+<li>PID, MNT, UTS, IPC namespaces
+</li>
+<li>Network namespace (optional, required for NAT/None modes)
+</li>
+<li>Cgroup namespace (optional, for modern cgroup isolation)
+</li>
+<li>devtmpfs support
+</li>
+<li>OverlayFS support (optional, for volatile mode)
+</li>
+<li>VETH and Bridge support (optional, for NAT mode)
+</li>
+<li>PTY/devpts support
+</li>
+<li>Loop device support
+</li>
+<li>ext4 support
+</li>
 </ul>
 <h3 id="2-understanding-the-results">2. Understanding the Results</h3>
 <div class="table-wrap"><table>
@@ -668,16 +698,22 @@ CONFIG_TMPFS_XATTR=y
 <h3 id="legacy-kernel-considerations-419-and-below">Legacy Kernel Considerations (4.19 and below)</h3>
 <p>Legacy kernels may present some challenges for modern nested container tools:</p>
 <ul>
-<li><strong>Deadlock Shield trade-off</strong>: If your device is affected by the 4.14.113 <code>grab_super()</code> VFS deadlock and requires the Deadlock Shield to boot systemd, enabling the shield will also block the namespace syscalls that Docker, LXC, and Podman need. You cannot use nested containers while the shield is active.</li>
-<li><strong>Networking incompatibilities</strong>: Modern Docker, LXC, and Podman rely on <code>nftables</code>. Legacy kernels often lack full <code>nftables</code> support. To work around this, use Droidspaces in NAT mode and switch your container's iptables alternative to <code>iptables-legacy</code> and <code>ip6tables-legacy</code>.</li>
-<li><strong>BPF conflicts</strong>: Modern Docker and runc use <code>BPF_CGROUP_DEVICE</code> for device management. Legacy kernels do not support the required BPF attach types, which causes <code>Invalid argument</code> errors. To work around this, configure Docker to use the <code>cgroupfs</code> driver and the <code>vfs</code> storage driver.</li>
+<li><strong>Deadlock Shield trade-off</strong>: If your device is affected by the 4.14.113 <code>grab_super()</code> VFS deadlock and requires the Deadlock Shield to boot systemd, enabling the shield will also block the namespace syscalls that Docker, LXC, and Podman need. You cannot use nested containers while the shield is active.
+</li>
+<li><strong>Networking incompatibilities</strong>: Modern Docker, LXC, and Podman rely on <code>nftables</code>. Legacy kernels often lack full <code>nftables</code> support. To work around this, use Droidspaces in NAT mode and switch your container's iptables alternative to <code>iptables-legacy</code> and <code>ip6tables-legacy</code>.
+</li>
+<li><strong>BPF conflicts</strong>: Modern Docker and runc use <code>BPF_CGROUP_DEVICE</code> for device management. Legacy kernels do not support the required BPF attach types, which causes <code>Invalid argument</code> errors. To work around this, configure Docker to use the <code>cgroupfs</code> driver and the <code>vfs</code> storage driver.
+</li>
 </ul>
 <hr>
 <h2 id="resources">Additional Resources</h2>
 <ul>
-<li><a href="https://github.com/ravindu644/Android-Kernel-Tutorials" rel="noopener noreferrer">Android Kernel Tutorials</a> by ravindu644</li>
-<li><a href="https://www.kernel.org/doc/html/latest/admin-guide/kernel-parameters.html" rel="noopener noreferrer">Kernel Configuration Reference</a></li>
-<li><a href="https://t.me/Droidspaces" rel="noopener noreferrer">Droidspaces Telegram Channel</a> for kernel-specific support</li>
+<li><a href="https://github.com/ravindu644/Android-Kernel-Tutorials" rel="noopener noreferrer">Android Kernel Tutorials</a> by ravindu644
+</li>
+<li><a href="https://www.kernel.org/doc/html/latest/admin-guide/kernel-parameters.html" rel="noopener noreferrer">Kernel Configuration Reference</a>
+</li>
+<li><a href="https://t.me/Droidspaces" rel="noopener noreferrer">Droidspaces Telegram Channel</a> for kernel-specific support
+</li>
 </ul>
 <div class="doc-nav-buttons"><a href="gpu-acceleration.html" class="doc-nav-btn doc-nav-prev">← Droidspaces GPU Acceleration Guide</a><a href="usage-android-app.html" class="doc-nav-btn doc-nav-next">Android App Usage Guide →</a></div>
       <p class="doc-copyright">&copy; 2026 Droidspaces &nbsp;·&nbsp; <a href="https://github.com/ravindu644/Droidspaces-OSS/blob/main/LICENSE" rel="noopener noreferrer">GPLv3</a> &nbsp;·&nbsp; by <a href="https://github.com/ravindu644" rel="noopener noreferrer">ravindu644</a> and <a href="https://github.com/ravindu644/Droidspaces-OSS/graphs/contributors" rel="noopener noreferrer">contributors</a>

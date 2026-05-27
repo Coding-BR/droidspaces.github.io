@@ -138,72 +138,98 @@ def md_to_html(md):
             html.append(convert_table(rows))
             continue
 
-        # Ordered lists
-        olm = re.match(r'^\s*\d+\.\s+(.+)$', line)
-        if olm:
-            items = []
-            while i < len(lines) and re.match(r'^\s*\d+\.\s+', lines[i]):
-                item_text = re.sub(r'^\s*\d+\.\s+', '', lines[i])
-                item_html = inline_format(item_text)
-                i += 1
-                extra = []
-                while i < len(lines):
-                    s = lines[i].lstrip()
-                    indent = len(lines[i]) - len(s)
-                    if indent >= 3 and s.startswith('```'):
-                        ch, i = consume_code(lines, i)
-                        extra.append(ch)
-                    elif indent >= 3 and s.startswith('> '):
-                        extra.append(f'<blockquote>{inline_format(s[2:])}</blockquote>')
-                        i += 1
-                    elif lines[i].strip() == '':
-                        i += 1
-                        continue
-                    elif indent >= 3 and s.strip():
-                        extra.append(inline_format(s))
-                        i += 1
-                    else:
-                        break
-                items.append(f'<li>{" ".join(extra) if item_html == "" else item_html}{"".join(extra) if item_html != "" else ""}</li>')
-            # Fix: combine item_html with extra
-            fixed_items = []
-            for item in items:
-                fixed_items.append(item)
-            html.append('<ol>\n' + '\n'.join(items) + '\n</ol>')
-            continue
+        # Lists (ordered and unordered) — stack-based recursive nesting
+        def is_list_item(ln):
+            return bool(re.match(r'^(\s*)(?:\d+\.|[-*+])\s+', ln))
 
-        # Unordered lists
-        ulm = re.match(r'^[\s]*[-*+]\s+', line)
-        if ulm:
-            items = []
-            while i < len(lines) and re.match(r'^[\s]*[-*+]\s+', lines[i]):
-                item_text = re.sub(r'^[\s]*[-*+]\s+', '', lines[i])
-                item_html = inline_format(item_text)
-                i += 1
-                extra = []
-                while i < len(lines):
-                    s = lines[i].lstrip()
-                    indent = len(lines[i]) - len(s)
-                    if indent >= 3 and s.startswith('```'):
-                        ch, i = consume_code(lines, i)
-                        extra.append(ch)
-                    elif indent >= 3 and s.startswith('> '):
-                        extra.append(f'<blockquote>{inline_format(s[2:])}</blockquote>')
-                        i += 1
-                    elif lines[i].strip() == '':
-                        i += 1
+        def item_indent(ln):
+            m = re.match(r'^(\s*)', ln)
+            return len(m.group(1)) if m else 0
+
+        def item_tag(ln):
+            """Return 'ol' for ordered, 'ul' for unordered."""
+            stripped = ln.lstrip()
+            return 'ol' if re.match(r'^\d+\.\s+', stripped) else 'ul'
+
+        def item_text_content(ln):
+            return re.sub(r'^\s*(?:\d+\.|[-*+])\s+', '', ln)
+
+        def consume_list(lines, start, base_indent):
+            """Recursively parse a list starting at `start` with `base_indent`.
+            Returns (html_string, next_line_index)."""
+            i = start
+            tag = item_tag(lines[i])
+            parts = [f'<{tag}>']
+            while i < len(lines):
+                ln = lines[i]
+                if not ln.strip():
+                    # blank line — peek ahead to see if list continues
+                    j = i + 1
+                    while j < len(lines) and not lines[j].strip():
+                        j += 1
+                    if j < len(lines) and is_list_item(lines[j]) and item_indent(lines[j]) >= base_indent:
+                        i = j
                         continue
-                    elif indent >= 3 and s.strip():
-                        extra.append(inline_format(s))
+                    break
+                if not is_list_item(ln):
+                    break
+                ind = item_indent(ln)
+                if ind < base_indent:
+                    break
+                if ind > base_indent:
+                    # deeper — recurse as nested list inside current <li>
+                    nested_html, i = consume_list(lines, i, ind)
+                    parts.append(nested_html)
+                    continue
+                # Same indent — new sibling list item
+                # Close previous <li> if open
+                if parts[-1] != f'<{tag}>':
+                    parts.append('</li>')
+                text = inline_format(item_text_content(ln))
+                parts.append(f'<li>{text}')
+                i += 1
+                # Consume continuation content (code blocks, blockquotes, plain text)
+                while i < len(lines):
+                    cont = lines[i]
+                    if not cont.strip():
+                        # blank — check if continuation follows
+                        j = i + 1
+                        while j < len(lines) and not lines[j].strip():
+                            j += 1
+                        if j < len(lines):
+                            cind = item_indent(lines[j]) if is_list_item(lines[j]) else (len(lines[j]) - len(lines[j].lstrip()))
+                            if cind > base_indent:
+                                i = j
+                                continue
+                        break
+                    s = cont.lstrip()
+                    cind = len(cont) - len(s)
+                    if is_list_item(cont) and item_indent(cont) > base_indent:
+                        nested_html, i = consume_list(lines, i, item_indent(cont))
+                        parts.append(nested_html)
+                    elif is_list_item(cont) and item_indent(cont) == base_indent:
+                        break
+                    elif cind > base_indent and s.startswith('```'):
+                        ch, i = consume_code(lines, i)
+                        parts.append(ch)
+                    elif cind > base_indent and s.startswith('> '):
+                        parts.append(f'<blockquote>{inline_format(s[2:])}</blockquote>')
+                        i += 1
+                    elif cind > base_indent and s.strip():
+                        parts.append(f'<p>{inline_format(s)}</p>')
                         i += 1
                     else:
                         break
-                items.append(f'<li>{" ".join(extra) if item_html == "" else item_html}{"".join(extra) if item_html != "" else ""}</li>')
-            # Fix the combine
-            combined = []
-            for item in items:
-                combined.append(item)
-            html.append('<ul>\n' + '\n'.join(items) + '\n</ul>')
+            # Close any open <li>
+            if parts and parts[-1] != f'<{tag}>':
+                parts.append('</li>')
+            parts.append(f'</{tag}>')
+            return '\n'.join(parts), i
+
+        if is_list_item(line):
+            base = item_indent(line)
+            list_html, i = consume_list(lines, i, base)
+            html.append(list_html)
             continue
 
         # Paragraph
@@ -554,13 +580,17 @@ def make_page(title, body, slug, nav_template, footer_template, pages, is_index=
     }}
     .table-wrap {{
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       margin-bottom: 1.5rem;
     }}
     .table-wrap table {{
+      width: max-content;
+      min-width: 100%;
       margin-bottom: 0;
     }}
     .sidebar-content table {{
-      width: 100%; border-collapse: collapse; font-size: 0.85rem;
+      width: max-content; min-width: 100%;
+      border-collapse: collapse; font-size: 0.85rem;
       margin-bottom: 1.5rem;
     }}
     .sidebar-content th {{
@@ -568,13 +598,13 @@ def make_page(title, body, slug, nav_template, footer_template, pages, is_index=
       text-transform: uppercase; letter-spacing: 0.06em;
       padding: 0.75rem 1rem; text-align: left; color: var(--muted);
       border-bottom: 1px solid var(--border); background: var(--bg3);
-      white-space: normal;
-      word-break: break-word; overflow-wrap: anywhere;
+      white-space: nowrap;
     }}
     .sidebar-content td {{
       padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
       color: var(--muted);
-      word-break: break-word;
+      white-space: normal; word-break: normal;
+      overflow-wrap: break-word; max-width: 300px;
     }}
     .sidebar-content img {{
       max-width: 100%; border-radius: 8px; border: 1px solid var(--border);

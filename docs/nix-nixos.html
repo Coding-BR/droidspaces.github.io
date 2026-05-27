@@ -152,13 +152,17 @@
     }
     .table-wrap {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       margin-bottom: 1.5rem;
     }
     .table-wrap table {
+      width: max-content;
+      min-width: 100%;
       margin-bottom: 0;
     }
     .sidebar-content table {
-      width: 100%; border-collapse: collapse; font-size: 0.85rem;
+      width: max-content; min-width: 100%;
+      border-collapse: collapse; font-size: 0.85rem;
       margin-bottom: 1.5rem;
     }
     .sidebar-content th {
@@ -166,13 +170,13 @@
       text-transform: uppercase; letter-spacing: 0.06em;
       padding: 0.75rem 1rem; text-align: left; color: var(--muted);
       border-bottom: 1px solid var(--border); background: var(--bg3);
-      white-space: normal;
-      word-break: break-word; overflow-wrap: anywhere;
+      white-space: nowrap;
     }
     .sidebar-content td {
       padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
       color: var(--muted);
-      word-break: break-word;
+      white-space: normal; word-break: normal;
+      overflow-wrap: break-word; max-width: 300px;
     }
     .sidebar-content img {
       max-width: 100%; border-radius: 8px; border: 1px solid var(--border);

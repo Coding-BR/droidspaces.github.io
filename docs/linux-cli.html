@@ -152,13 +152,17 @@
     }
     .table-wrap {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       margin-bottom: 1.5rem;
     }
     .table-wrap table {
+      width: max-content;
+      min-width: 100%;
       margin-bottom: 0;
     }
     .sidebar-content table {
-      width: 100%; border-collapse: collapse; font-size: 0.85rem;
+      width: max-content; min-width: 100%;
+      border-collapse: collapse; font-size: 0.85rem;
       margin-bottom: 1.5rem;
     }
     .sidebar-content th {
@@ -166,13 +170,13 @@
       text-transform: uppercase; letter-spacing: 0.06em;
       padding: 0.75rem 1rem; text-align: left; color: var(--muted);
       border-bottom: 1px solid var(--border); background: var(--bg3);
-      white-space: normal;
-      word-break: break-word; overflow-wrap: anywhere;
+      white-space: nowrap;
     }
     .sidebar-content td {
       padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
       color: var(--muted);
-      word-break: break-word;
+      white-space: normal; word-break: normal;
+      overflow-wrap: break-word; max-width: 300px;
     }
     .sidebar-content img {
       max-width: 100%; border-radius: 8px; border: 1px solid var(--border);
@@ -630,9 +634,12 @@ sudo droidspaces --name=dev-box --rootfs=/path/to/rootfs --privileged=nocaps,nos
 <hr>
 <h2 id="next-steps">Next Steps</h2>
 <ul>
-<li><a href="features.html" rel="noopener noreferrer">Feature Deep Dives</a></li>
-<li><a href="troubleshooting.html" rel="noopener noreferrer">Troubleshooting</a></li>
-<li><a href="usage-android-app.html" rel="noopener noreferrer">Android App Usage Guide</a></li>
+<li><a href="features.html" rel="noopener noreferrer">Feature Deep Dives</a>
+</li>
+<li><a href="troubleshooting.html" rel="noopener noreferrer">Troubleshooting</a>
+</li>
+<li><a href="usage-android-app.html" rel="noopener noreferrer">Android App Usage Guide</a>
+</li>
 </ul>
 <div class="doc-nav-buttons"><a href="usage-android-app.html" class="doc-nav-btn doc-nav-prev">← Android App Usage Guide</a><a href="cool-things-you-can-do.html" class="doc-nav-btn doc-nav-next">Cool Things You Can Do with Droidspaces →</a></div>
       <p class="doc-copyright">&copy; 2026 Droidspaces &nbsp;·&nbsp; <a href="https://github.com/ravindu644/Droidspaces-OSS/blob/main/LICENSE" rel="noopener noreferrer">GPLv3</a> &nbsp;·&nbsp; by <a href="https://github.com/ravindu644" rel="noopener noreferrer">ravindu644</a> and <a href="https://github.com/ravindu644/Droidspaces-OSS/graphs/contributors" rel="noopener noreferrer">contributors</a>

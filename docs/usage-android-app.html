@@ -152,13 +152,17 @@
     }
     .table-wrap {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       margin-bottom: 1.5rem;
     }
     .table-wrap table {
+      width: max-content;
+      min-width: 100%;
       margin-bottom: 0;
     }
     .sidebar-content table {
-      width: 100%; border-collapse: collapse; font-size: 0.85rem;
+      width: max-content; min-width: 100%;
+      border-collapse: collapse; font-size: 0.85rem;
       margin-bottom: 1.5rem;
     }
     .sidebar-content th {
@@ -166,13 +170,13 @@
       text-transform: uppercase; letter-spacing: 0.06em;
       padding: 0.75rem 1rem; text-align: left; color: var(--muted);
       border-bottom: 1px solid var(--border); background: var(--bg3);
-      white-space: normal;
-      word-break: break-word; overflow-wrap: anywhere;
+      white-space: nowrap;
     }
     .sidebar-content td {
       padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
       color: var(--muted);
-      word-break: break-word;
+      white-space: normal; word-break: normal;
+      overflow-wrap: break-word; max-width: 300px;
     }
     .sidebar-content img {
       max-width: 100%; border-radius: 8px; border: 1px solid var(--border);
@@ -394,35 +398,49 @@
 <p>The Droidspaces Android app provides a premium GUI for managing Linux containers. It abstracts away the complexity of namespaces and mounts while giving you high-level control over your environments.</p>
 <h2 id="bottom-navigation">Bottom Navigation</h2>
 <ul>
-<li><strong>Home</strong>: A dashboard displaying the number of installed and running containers, root availability status, and the backend version.</li>
-<li><strong>Containers</strong>: A dedicated manager for all installed containers (Install, Start, Stop, Edit, and Uninstall).</li>
-<li><strong>Panel</strong>: A central dashboard for managing <strong>Running Containers</strong> and monitoring real-time <strong>System Statistics</strong> (CPU, RAM, Temperature, etc.).</li>
+<li><strong>Home</strong>: A dashboard displaying the number of installed and running containers, root availability status, and the backend version.
+</li>
+<li><strong>Containers</strong>: A dedicated manager for all installed containers (Install, Start, Stop, Edit, and Uninstall).
+</li>
+<li><strong>Panel</strong>: A central dashboard for managing <strong>Running Containers</strong> and monitoring real-time <strong>System Statistics</strong> (CPU, RAM, Temperature, etc.).
+</li>
 </ul>
 <hr>
 <h2 id="containers-tab">Containers Tab</h2>
 <p>This tab allows you to install containers using the "+" icon, and lists all your installed environments. Each container has a control card:</p>
 <ul>
-<li><strong>Install Button (+)</strong>: Install a new container.</li>
-<li><strong>Play Button</strong>: Start the container and boot the init system.</li>
-<li><strong>Stop Button</strong>: Sends a graceful shutdown signal to the container's init.</li>
-<li><strong>Cycle Button</strong>: Fast-restart the container.</li>
-<li><strong>Terminal Icon (Logs)</strong>: Provides access to persistent session logs for the container's previous start, stop, and restart sequences.</li>
+<li><strong>Install Button (+)</strong>: Install a new container.
+</li>
+<li><strong>Play Button</strong>: Start the container and boot the init system.
+</li>
+<li><strong>Stop Button</strong>: Sends a graceful shutdown signal to the container's init.
+</li>
+<li><strong>Cycle Button</strong>: Fast-restart the container.
+</li>
+<li><strong>Terminal Icon (Logs)</strong>: Provides access to persistent session logs for the container's previous start, stop, and restart sequences.
+</li>
 </ul>
 <div class="callout callout-tip"><strong class="callout-title">TIP</strong> You can <strong>edit container configuration</strong> or <strong>uninstall</strong> existing installed containers by <strong>pressing and holding</strong> the container's card. Also gives you the ability to migrate to a <code>rootfs.img</code>-based container or resize your existing <code>rootfs.img</code>..!</div>
 <hr>
 <h2 id="networking-configuration">Networking Configuration</h2>
 <p>When editing or creating a container, you can choose from three networking modes:</p>
 <ul>
-<li><strong>Host (Default)</strong>: Shares host network directly.</li>
-<li><strong>NAT (Isolated)</strong>: Private network namespace with deterministic IP and port forwarding support.</li>
-<li><strong>None</strong>: No network access.</li>
+<li><strong>Host (Default)</strong>: Shares host network directly.
+</li>
+<li><strong>NAT (Isolated)</strong>: Private network namespace with deterministic IP and port forwarding support.
+</li>
+<li><strong>None</strong>: No network access.
+</li>
 </ul>
 <h3 id="configuring-upstream-interfaces-nat-mode">Configuring Upstream Interfaces (NAT Mode)</h3>
 <p>If you select <strong>NAT (Isolated)</strong> mode, you <strong>must</strong> specify one or more upstream interfaces for the container to have internet access. The app provides a convenient auto-detection workflow:</p>
 <ol>
-<li><strong>Detect Wi-Fi</strong>: Connect to your Wi-Fi network and press the refresh button in the "Upstream Interfaces" menu. Select the interface (usually <code>wlan0</code>) that appears.</li>
-<li><strong>Detect Mobile Data</strong>: Disable Wi-Fi and connect to mobile data. Press the refresh button again and select the mobile data interface (e.g., <code>rmnet0</code>, <code>ccmni1</code>).</li>
-<li><strong>Save</strong>: Both interfaces will now be used by the Route Monitor to keep your container connected as you switch networks.</li>
+<li><strong>Detect Wi-Fi</strong>: Connect to your Wi-Fi network and press the refresh button in the "Upstream Interfaces" menu. Select the interface (usually <code>wlan0</code>) that appears.
+</li>
+<li><strong>Detect Mobile Data</strong>: Disable Wi-Fi and connect to mobile data. Press the refresh button again and select the mobile data interface (e.g., <code>rmnet0</code>, <code>ccmni1</code>).
+</li>
+<li><strong>Save</strong>: Both interfaces will now be used by the Route Monitor to keep your container connected as you switch networks.
+</li>
 </ol>
 <div class="callout callout-tip"><strong class="callout-title">TIP</strong> You can manually enter wildcards in the Upstream Interfaces list (e.g., <code>rmnet*</code>) to ensure connectivity even if your carrier cycles through different interface names (like <code>rmnet_data0</code> and <code>rmnet_data1</code>).</div>
 <div class="callout callout-note"><strong class="callout-title">NOTE</strong> NAT mode is IPv4 only. If your carrier only provides IPv6, see the <a href="troubleshooting.html#ipv4-quirks" rel="noopener noreferrer">IPv4 NAT Workaround</a>.</div>
@@ -439,21 +457,32 @@
 <h3 id="method-1-built-in-terminal-v570">Method 1: Built-in Terminal (v5.7.0+)</h3>
 <p>This is the most convenient way to quickly run commands without leaving the Droidspaces app.</p>
 <ol>
-<li>Ensure the container is <strong>RUNNING</strong>.</li>
-<li>Navigate to the <strong>Panel</strong> tab and tap the container to open its <strong>Details</strong>.</li>
-<li>Find the <strong>Terminal</strong> card and tap <strong>Open</strong>.</li>
-<li>Select the <strong>User</strong> you wish to log in as (e.g., <code>root</code> or your default user).</li>
-<li>An interactive terminal will launch directly within the app.</li>
+<li>Ensure the container is <strong>RUNNING</strong>.
+</li>
+<li>Navigate to the <strong>Panel</strong> tab and tap the container to open its <strong>Details</strong>.
+</li>
+<li>Find the <strong>Terminal</strong> card and tap <strong>Open</strong>.
+</li>
+<li>Select the <strong>User</strong> you wish to log in as (e.g., <code>root</code> or your default user).
+</li>
+<li>An interactive terminal will launch directly within the app.
+</li>
 </ol>
 <h3 id="method-2-external-terminal-copy-login">Method 2: External Terminal (Copy Login)</h3>
 <p>For power users who prefer <strong>Termux</strong>, <strong>ADB</strong>, or other terminal emulators, Droidspaces allows you to "attach" external sessions to the container.</p>
 <ol>
-<li>Ensure the container is <strong>RUNNING</strong>.</li>
-<li>Open the container <strong>Details</strong> in the <strong>Panel</strong> tab.</li>
-<li>Select your desired user from the dropdown menu.</li>
-<li>Tap <strong>Copy Login</strong>. This copies a command like <code>su -c 'droidspaces --name=[name enter [user]'</code> to your clipboard.</li>
-<li>Open your preferred terminal (e.g., Termux) and <strong>Paste</strong> the command.</li>
-<li><strong>Run</strong> the command (ensure your terminal has root permissions granted from your root manager).</li>
+<li>Ensure the container is <strong>RUNNING</strong>.
+</li>
+<li>Open the container <strong>Details</strong> in the <strong>Panel</strong> tab.
+</li>
+<li>Select your desired user from the dropdown menu.
+</li>
+<li>Tap <strong>Copy Login</strong>. This copies a command like <code>su -c 'droidspaces --name=[name enter [user]'</code> to your clipboard.
+</li>
+<li>Open your preferred terminal (e.g., Termux) and <strong>Paste</strong> the command.
+</li>
+<li><strong>Run</strong> the command (ensure your terminal has root permissions granted from your root manager).
+</li>
 </ol>
 <hr>
 <h2 id="settings-requirements">Settings & Requirements</h2>

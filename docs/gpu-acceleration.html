@@ -152,13 +152,17 @@
     }
     .table-wrap {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       margin-bottom: 1.5rem;
     }
     .table-wrap table {
+      width: max-content;
+      min-width: 100%;
       margin-bottom: 0;
     }
     .sidebar-content table {
-      width: 100%; border-collapse: collapse; font-size: 0.85rem;
+      width: max-content; min-width: 100%;
+      border-collapse: collapse; font-size: 0.85rem;
       margin-bottom: 1.5rem;
     }
     .sidebar-content th {
@@ -166,13 +170,13 @@
       text-transform: uppercase; letter-spacing: 0.06em;
       padding: 0.75rem 1rem; text-align: left; color: var(--muted);
       border-bottom: 1px solid var(--border); background: var(--bg3);
-      white-space: normal;
-      word-break: break-word; overflow-wrap: anywhere;
+      white-space: nowrap;
     }
     .sidebar-content td {
       padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
       color: var(--muted);
-      word-break: break-word;
+      white-space: normal; word-break: normal;
+      overflow-wrap: break-word; max-width: 300px;
     }
     .sidebar-content img {
       max-width: 100%; border-radius: 8px; border: 1px solid var(--border);
@@ -394,8 +398,18 @@
 <p>This guide provides step-by-step instructions for enabling GPU acceleration in your Droidspaces containers. Whether you are running on an Android device or a Linux desktop, Droidspaces offers multiple ways to leverage hardware acceleration for a smooth graphical experience.</p>
 <h3 id="quick-navigation">Quick Navigation</h3>
 <ul>
-<li><a href="#android" rel="noopener noreferrer"><strong>Android Devices</strong></a>  - <a href="#termux-x11" rel="noopener noreferrer">01. Termux-X11 + llvmpipe (Software Rendering)</a>  - <a href="#virgl" rel="noopener noreferrer">02. Termux-X11 + VirGL (Non-Qualcomm GPUs)</a>  - <a href="#turnip" rel="noopener noreferrer">03. Turnip (Native Qualcomm/Adreno)</a>  </li>
-<li><a href="#linux" rel="noopener noreferrer"><strong>Linux Desktop (AMD/Intel)</strong></a>  </li>
+<li><a href="#android" rel="noopener noreferrer"><strong>Android Devices</strong></a>  
+<ul>
+<li><a href="#termux-x11" rel="noopener noreferrer">01. Termux-X11 + llvmpipe (Software Rendering)</a>  
+</li>
+<li><a href="#virgl" rel="noopener noreferrer">02. Termux-X11 + VirGL (Non-Qualcomm GPUs)</a>  
+</li>
+<li><a href="#turnip" rel="noopener noreferrer">03. Turnip (Native Qualcomm/Adreno)</a>  
+</li>
+</ul>
+</li>
+<li><a href="#linux" rel="noopener noreferrer"><strong>Linux Desktop (AMD/Intel)</strong></a>  
+</li>
 </ul>
 <hr>
 <a id="android"></a>
@@ -408,26 +422,40 @@
 <h4 id="the-unified-tmpfs-bridge">The "Unified Tmpfs Bridge"</h4>
 <p>When you enable the <strong>Termux X11</strong> toggle in the Droidspaces app, the following sequence occurs:</p>
 <ol>
-<li><strong>Host-side Preparation</strong>: Droidspaces creates a <code>tmpfs</code> mount on top of Termux's <code>/data/data/com.termux/files/usr/tmp</code> in the host's mount namespace.</li>
-<li><strong>Bypassing FBE Encryption</strong>: While a direct bind-mount of <code>/data/data/com.termux/files/usr/tmp</code> to the container is possible, it frequently breaks applications like <code>apt</code> or any tool performing heavy I/O in <code>/tmp</code>. This happens because Termux's data directory is protected by Android's File-Based Encryption (FBE), leading to "Required key not available" (ENOKEY) errors. By bridging the path via <code>tmpfs</code>, X11 sockets and temporary files become fully readable and writable by the container.</li>
-<li><strong>Bind Mounting</strong>: This "Unified Tmpfs Bridge" is then bind-mounted to the container's <code>/tmp</code> directory, enabling seamless communication between the container and the Termux-X11 app.</li>
+<li><strong>Host-side Preparation</strong>: Droidspaces creates a <code>tmpfs</code> mount on top of Termux's <code>/data/data/com.termux/files/usr/tmp</code> in the host's mount namespace.
+</li>
+<li><strong>Bypassing FBE Encryption</strong>: While a direct bind-mount of <code>/data/data/com.termux/files/usr/tmp</code> to the container is possible, it frequently breaks applications like <code>apt</code> or any tool performing heavy I/O in <code>/tmp</code>. This happens because Termux's data directory is protected by Android's File-Based Encryption (FBE), leading to "Required key not available" (ENOKEY) errors. By bridging the path via <code>tmpfs</code>, X11 sockets and temporary files become fully readable and writable by the container.
+</li>
+<li><strong>Bind Mounting</strong>: This "Unified Tmpfs Bridge" is then bind-mounted to the container's <code>/tmp</code> directory, enabling seamless communication between the container and the Termux-X11 app.
+</li>
 </ol>
 <h4 id="setup-requirements">Setup Requirements</h4>
 <ul>
-<li><strong>Termux</strong>: <code>pkg install x11-repo && pkg install termux-x11</code></li>
-<li><strong>Container</strong>: <code>sudo apt install mesa-utils</code> (for testing with <code>glxgears</code>)</li>
+<li><strong>Termux</strong>: <code>pkg install x11-repo && pkg install termux-x11</code>
+</li>
+<li><strong>Container</strong>: <code>sudo apt install mesa-utils</code> (for testing with <code>glxgears</code>)
+</li>
 </ul>
 <h4 id="implementation-steps">Implementation Steps</h4>
 <ol>
-<li><strong>Configure Container</strong>: In the Droidspaces app, navigate to your container's configuration.</li>
-<li><strong>Enable X11</strong>: Toggle <strong>Termux-X11</strong> to <code>ON</code> (<strong>Hardware Access</strong> is not required for software rendering).</li>
-<li><strong>Environment</strong>: Add <code>DISPLAY=:0</code> to the <strong>Environment Variables</strong> section and save.</li>
-<li><strong>Start Container</strong>: Launch your container.</li>
-<li><strong>Launch X Server</strong>: Open the Termux app and run:<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>termux-x11 :0
-</code></pre></div></li>
-<li><strong>Verify</strong>: Run <code>glxgears</code> inside the container terminal. The output will render in the Termux-X11 app.</li>
-<li><strong>Start Desktop Environment</strong>: To launch the full XFCE desktop (if installed), run:<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>dbus-launch --exit-with-session startxfce4
-</code></pre></div></li>
+<li><strong>Configure Container</strong>: In the Droidspaces app, navigate to your container's configuration.
+</li>
+<li><strong>Enable X11</strong>: Toggle <strong>Termux-X11</strong> to <code>ON</code> (<strong>Hardware Access</strong> is not required for software rendering).
+</li>
+<li><strong>Environment</strong>: Add <code>DISPLAY=:0</code> to the <strong>Environment Variables</strong> section and save.
+</li>
+<li><strong>Start Container</strong>: Launch your container.
+</li>
+<li><strong>Launch X Server</strong>: Open the Termux app and run:
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>termux-x11 :0
+</code></pre></div>
+</li>
+<li><strong>Verify</strong>: Run <code>glxgears</code> inside the container terminal. The output will render in the Termux-X11 app.
+</li>
+<li><strong>Start Desktop Environment</strong>: To launch the full XFCE desktop (if installed), run:
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>dbus-launch --exit-with-session startxfce4
+</code></pre></div>
+</li>
 </ol>
 <hr>
 <a id="virgl"></a>
@@ -435,22 +463,34 @@
 <p>This method provides <strong>GPU acceleration for non-Qualcomm devices (Mali/PowerVR)</strong> via a <code>virglrenderer</code> bridge. It translates OpenGL calls from the container into commands that the host Android OS can execute.</p>
 <h4 id="setup-requirements">Setup Requirements</h4>
 <ul>
-<li><strong>Termux</strong>: <code>pkg install x11-repo && pkg install termux-x11 virglrenderer-android</code></li>
-<li><strong>Container</strong>: <code>sudo apt install mesa-utils</code> (for testing with <code>glxgears</code>)</li>
+<li><strong>Termux</strong>: <code>pkg install x11-repo && pkg install termux-x11 virglrenderer-android</code>
+</li>
+<li><strong>Container</strong>: <code>sudo apt install mesa-utils</code> (for testing with <code>glxgears</code>)
+</li>
 </ul>
 <h4 id="implementation-steps">Implementation Steps</h4>
 <ol>
-<li><strong>Container Configuration</strong>: Enable <strong>Termux-X11</strong> in the Droidspaces container settings. Then, add the following to the <strong>Environment Variables</strong> section:<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>DISPLAY=:0
+<li><strong>Container Configuration</strong>: Enable <strong>Termux-X11</strong> in the Droidspaces container settings. Then, add the following to the <strong>Environment Variables</strong> section:
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>DISPLAY=:0
 GALLIUM_DRIVER=virpipe
-</code></pre></div></li>
-<li><strong>Start Container</strong>: Launch your container.</li>
-<li><strong>Start VirGL Server</strong>: Open Termux and run the server in the background:<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>virgl_test_server_android &
-</code></pre></div></li>
-<li><strong>Start X Server</strong>: In Termux, run:<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>termux-x11 :0
-</code></pre></div></li>
-<li><strong>Verify Acceleration</strong>: Run <code>glxinfo -B</code> and look for "VirGL" in the renderer string.</li>
-<li><strong>Start Desktop Environment</strong>: To launch the full XFCE desktop (if installed), run:<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>dbus-launch --exit-with-session startxfce4
-</code></pre></div></li>
+</code></pre></div>
+</li>
+<li><strong>Start Container</strong>: Launch your container.
+</li>
+<li><strong>Start VirGL Server</strong>: Open Termux and run the server in the background:
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>virgl_test_server_android &
+</code></pre></div>
+</li>
+<li><strong>Start X Server</strong>: In Termux, run:
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>termux-x11 :0
+</code></pre></div>
+</li>
+<li><strong>Verify Acceleration</strong>: Run <code>glxinfo -B</code> and look for "VirGL" in the renderer string.
+</li>
+<li><strong>Start Desktop Environment</strong>: To launch the full XFCE desktop (if installed), run:
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>dbus-launch --exit-with-session startxfce4
+</code></pre></div>
+</li>
 </ol>
 <div class="callout callout-tip"><strong class="callout-title">TIP</strong> <strong>If the renderer fails to initialize,</strong> try starting the VirGL server with the Vulkan backend:
 <code>virgl_test_server_android --angle-vulkan &</code></div>
@@ -460,19 +500,36 @@ GALLIUM_DRIVER=virpipe
 <p>For Qualcomm Adreno GPUs, Droidspaces supports <strong>native hardware acceleration</strong> using the Turnip driver. This bypasses the need for <code>virgl</code> and provides near-native performance.</p>
 <h4 id="requirements">Requirements</h4>
 <ul>
-<li><strong>Custom Mesa driver</strong>: Installed following the instructions from the <a href="https://github.com/lfdevs/mesa-for-android-container" rel="noopener noreferrer">Mesa for Android Container repository</a>.</li>
-<li><strong>Termux</strong>: <code>pkg install x11-repo && pkg install termux-x11</code></li>
+<li><strong>Custom Mesa driver</strong>: Installed following the instructions from the <a href="https://github.com/lfdevs/mesa-for-android-container" rel="noopener noreferrer">Mesa for Android Container repository</a>.
+</li>
+<li><strong>Termux</strong>: <code>pkg install x11-repo && pkg install termux-x11</code>
+</li>
 </ul>
 <h4 id="implementation-steps">Implementation Steps</h4>
 <ol>
-<li><strong>Install the custom Mesa driver</strong> from the <a href="https://github.com/lfdevs/mesa-for-android-container" rel="noopener noreferrer">Mesa for Android Container repository</a>.</li>
-<li><strong>Enable GPU Access</strong>: In the container settings, enable <strong>GPU Access</strong> and <strong>Termux X11</strong>.</li>
-<li><strong>Set Display</strong>: Add <code>DISPLAY=:0</code> to your environment variables.</li>
-<li><strong>Launch Sequence</strong>:- Start the container via Droidspaces.- Open Termux and run <code>termux-x11 :0</code></li>
-<li><strong>Permission Management (Non-Root Users)</strong>:If you are using a non-root user, you must grant them access to the GPU device nodes:<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>sudo usermod -aG droidspaces-gpu <your_username>
-</code></pre></div></li>
-<li><strong>Start Desktop Environment</strong>: To launch the full XFCE desktop (if installed), run:<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>dbus-launch --exit-with-session startxfce4
-</code></pre></div></li>
+<li><strong>Install the custom Mesa driver</strong> from the <a href="https://github.com/lfdevs/mesa-for-android-container" rel="noopener noreferrer">Mesa for Android Container repository</a>.
+</li>
+<li><strong>Enable GPU Access</strong>: In the container settings, enable <strong>GPU Access</strong> and <strong>Termux X11</strong>.
+</li>
+<li><strong>Set Display</strong>: Add <code>DISPLAY=:0</code> to your environment variables.
+</li>
+<li><strong>Launch Sequence</strong>:
+<ul>
+<li>Start the container via Droidspaces.
+</li>
+<li>Open Termux and run <code>termux-x11 :0</code>
+</li>
+</ul>
+</li>
+<li><strong>Permission Management (Non-Root Users)</strong>:
+<p>If you are using a non-root user, you must grant them access to the GPU device nodes:</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>sudo usermod -aG droidspaces-gpu <your_username>
+</code></pre></div>
+</li>
+<li><strong>Start Desktop Environment</strong>: To launch the full XFCE desktop (if installed), run:
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>dbus-launch --exit-with-session startxfce4
+</code></pre></div>
+</li>
 </ol>
 <div class="callout callout-tip"><strong class="callout-title">TIP</strong> <strong>If you encounter any problems related to DRI3,</strong> try editing <code>/data/adb/modules/droidspaces/etc/droidspaces.te</code> and uncommenting the line:
 <code>allow untrusted_app_27 droidspacesd fd use</code></div>
@@ -482,17 +539,25 @@ GALLIUM_DRIVER=virpipe
 <p>On Linux-based hosts, GPU acceleration works natively with zero additional configuration within Droidspaces.</p>
 <h4 id="requirements">Requirements</h4>
 <ul>
-<li>An active X11 or Wayland session on your host.</li>
-<li>Functional GPU drivers (Mesa/Intel/AMD).</li>
+<li>An active X11 or Wayland session on your host.
+</li>
+<li>Functional GPU drivers (Mesa/Intel/AMD).
+</li>
 </ul>
 <h4 id="implementation-steps">Implementation Steps</h4>
 <ol>
-<li><strong>Enable Hardware Access</strong>: Ensure the <strong>Hardware Access</strong> toggle is enabled in your container configuration (or use the <code>--hw-access</code> CLI flag).</li>
-<li><strong>Xhost Permission</strong>: On your host machine, allow the container to connect to your X server:<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>xhost +local:
-</code></pre></div></li>
-<li><strong>Set Display Variable</strong>: Add the host's <code>DISPLAY</code> number to the container's environment (usually <code>:0</code>):<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>echo "DISPLAY=:0" >> /etc/environment
-</code></pre></div></li>
-<li><strong>Run Applications</strong>: GUI applications launched from the container will render natively with full hardware acceleration.</li>
+<li><strong>Enable Hardware Access</strong>: Ensure the <strong>Hardware Access</strong> toggle is enabled in your container configuration (or use the <code>--hw-access</code> CLI flag).
+</li>
+<li><strong>Xhost Permission</strong>: On your host machine, allow the container to connect to your X server:
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>xhost +local:
+</code></pre></div>
+</li>
+<li><strong>Set Display Variable</strong>: Add the host's <code>DISPLAY</code> number to the container's environment (usually <code>:0</code>):
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>echo "DISPLAY=:0" >> /etc/environment
+</code></pre></div>
+</li>
+<li><strong>Run Applications</strong>: GUI applications launched from the container will render natively with full hardware acceleration.
+</li>
 </ol>
 <div class="doc-nav-buttons"><a href="features.html" class="doc-nav-btn doc-nav-prev">← Feature Deep Dives</a><a href="kernel-configuration.html" class="doc-nav-btn doc-nav-next">Kernel Configuration Guide →</a></div>
       <p class="doc-copyright">&copy; 2026 Droidspaces &nbsp;·&nbsp; <a href="https://github.com/ravindu644/Droidspaces-OSS/blob/main/LICENSE" rel="noopener noreferrer">GPLv3</a> &nbsp;·&nbsp; by <a href="https://github.com/ravindu644" rel="noopener noreferrer">ravindu644</a> and <a href="https://github.com/ravindu644/Droidspaces-OSS/graphs/contributors" rel="noopener noreferrer">contributors</a>
