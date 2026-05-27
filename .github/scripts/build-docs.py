@@ -1100,7 +1100,7 @@ def generate_sitemap(root):
         'installation-android': 0.9, 'installation-linux': 0.8,
         'features': 0.7, 'gpu-acceleration': 0.7, 'kernel-configuration': 0.7,
         'usage-android-app': 0.7, 'linux-cli': 0.7, 'cool-things-you-can-do': 0.6,
-        'common-errors': 0.6, 'troubleshooting': 0.6, 'community-supported-devices': 0.5,
+        'troubleshooting': 0.6, 'community-supported-devices': 0.5,
         'nix-nixos': 0.5, 'uninstallation': 0.5,
     }
     urls = [(loc, pri) for fname, (loc, pri) in priorities.items()]
