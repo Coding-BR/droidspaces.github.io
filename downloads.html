@@ -70,20 +70,20 @@
   <section class="download-hero">
     <div class="container">
       <div class="section-label">Downloads</div>
-      <h1>v6.2.0</h1>
-      <p class="hero-desc">Released Date: 2026-05-22</p>
+      <h1>v6.2.5</h1>
+      <p class="hero-desc">Released Date: 2026-05-29</p>
       <div class="dl-cards">
         <div class="dl-card">
           <div class="dl-card-icon"><i class="fab fa-android"></i></div>
           <h3 class="dl-card-title">Android</h3>
           <p class="dl-card-desc">APK for rooted Android devices. KernelSU, Magisk, or APatch.</p>
-          <a href="https://github.com/ravindu644/Droidspaces-OSS/releases/download/v6.2.0/Droidspaces-universal-v6.2.0-2026-05-22.apk" class="btn btn-primary dl-card-btn"><i class="fas fa-download"></i> Download APK</a>
+          <a href="https://github.com/ravindu644/Droidspaces-OSS/releases/download/v6.2.5/Droidspaces-universal-v6.2.5-2026-05-29.apk" class="btn btn-primary dl-card-btn"><i class="fas fa-download"></i> Download APK</a>
         </div>
         <div class="dl-card">
           <div class="dl-card-icon"><i class="fab fa-linux"></i></div>
           <h3 class="dl-card-title">Linux</h3>
           <p class="dl-card-desc">Static tarball for any Linux distribution. Zero dependencies.</p>
-          <a href="https://github.com/ravindu644/Droidspaces-OSS/releases/download/v6.2.0/droidspaces-v6.2.0-2026-05-22.tar.gz" class="btn btn-primary dl-card-btn"><i class="fas fa-download"></i> Download Tarball</a>
+          <a href="https://github.com/ravindu644/Droidspaces-OSS/releases/download/v6.2.5/droidspaces-v6.2.5-2026-05-29.tar.gz" class="btn btn-primary dl-card-btn"><i class="fas fa-download"></i> Download Tarball</a>
         </div>
       </div>
       <div style="text-align:center;margin-top:1.5rem">
@@ -118,158 +118,152 @@
   <section class="section">
     <div class="container">
       <div class="section-label">Changelog</div>
-      <h2>v6.2.0</h2>
+      <h2>v6.2.5</h2>
       <div class="changelog-wrap">
         <div class="changelog" id="changelog-body">
           <h2 id="whats-changed">What's Changed</h2>
 <ul>
-<li>fix(terminal): resolve hostname before opening tabs/picker (588cca1)
+<li>fix: bump boot module version to v6.2.5 (65e8011)
 </li>
-<li>fix(terminal/panel): unified OSInfo stream eliminates hostname/metrics null bug (cb5cdd2)
+<li>docs: update XFCE tarball resource links and fix formatting for DRI3 tip (e64b269)
 </li>
-<li>droidspaces: bump v6.2.0 (823b889)
+<li>docs: update installation and usage guides to include Rootfs Repository features (afb16a3)
 </li>
-<li>Translated using Weblate (#144) (4c37545)
+<li>docs: update gallery and showcase screenshots in readme (8c2be2d)
 </li>
-<li>fix: prevent UI remount and terminal state loss on screen rotation (cc491fd)
+<li>droidspaces: v6.2.5 (be2dbc2)
 </li>
-<li>fix(service): update terminal session notification count and localize strings (f8088a5)
+<li>Translated using Weblate (#165) (0efdc4c)
 </li>
-<li>post_extract_fixes: configure systemd-networkd for eth0 and restrict network services to NAT mode via ExecCondition (2ae320c)
+<li>seccomp: drop mknod/mknodat device blocking (580c1ea)
 </li>
-<li>Merge branch 'dev' (16a7b39)
+<li>post_extract_fixes: generate and set machine-id to prevent systemd deadlocks on Fedora 44 (8645ce1)
 </li>
-<li>fix: correct banner printing order in start and restart flows (2b700a1)
+<li>post_extract_fixes: remove problematic iptables service files (2a30f3c)
 </li>
-<li>app: scale up Ubuntu logo (6bb6669)
+<li>Add conditional compilation for ds_socketd_record_core_event (924a3c1)
 </li>
-<li>nix: modularize code, keep API intact, add pinned systemd v257, improve rootfs module (#143) (6e535c1)
+<li>build: reduce R8 obfuscation to lower AV heuristic score (8de6bcc)
 </li>
-<li>app: add Azure icon support and map Azure and Mariner strings to IconUtils (b2ec2c6)
+<li>fix: declare BootReceiver to satisfy RECEIVE_BOOT_COMPLETED permission (9d1ff64)
 </li>
-<li>ui: Change default network mode to NAT and update static IP description (03c4bec)
+<li>fix: remove shadowed context variable in ContainerCard (1be8b50)
 </li>
-<li>socketd: preserve image-backed rootfs references in container summaries (#142) (b908c72)
+<li>docs: zh-CN: move language switcher to the top of README (01ff26c)
 </li>
-<li>config: implement semantic comparison to prevent redundant config writes (5ecb630)
+<li>fix: distro icons disappearing after app kill (d9d6bd5)
 </li>
-<li>Merge branch 'dev' (1363f5e)
+<li>mount: fix /proc/sys RW holes being clobbered by parent RO lock (2c1cf81)
 </li>
-<li>Merge branch 'main' into dev (aa89854)
+<li>refactor: rename clean_kmsg.txt to last_kmsg.txt for consistency in bug report collection (7291aa3)
 </li>
-<li>boot: guard UUID marker write against empty uuid (aba9b80)
+<li>daemon: add mid-run log rotation for droidspacesd.log (3805da1)
 </li>
-<li>app: preserve UUID across container config edits; parse uuid in parseConfig() (cf9cd1b)
+<li>ds_dhcp: fix cross-container DHCP leaks with ifindex and direction filtering (7964783)
 </li>
-<li>pid: add collect_active_uuids(); container: skip generate_uuid() if existing UUID is collision-free (5fe67cc)
+<li>style: enforce consistent code formatting using clang-format across source files (fffaa78)
 </li>
-<li>nix: add minimal-with-systemd-v257 (#141) (d20e6f1)
+<li>build: fix all hardened-debug compiler warnings (f1ae0ef)
 </li>
-<li>nix: fix android app drv that previously did not include binaries (#140) (f571bb2)
+<li>log: persist container logging across pivot_root isolation (ba51ef9)
 </li>
-<li>mount: skip tty1-N null symlinks in privileged+unfiltered-dev mode (b0acd95)
+<li>virtualize.c: add pre-check to skip virtualization updates if tmpfs directory is missing (2c2b6bf)
 </li>
-<li>docs: update contributing guidelines to include Linux support, platform detection, and strict submission requirements (7a9e778)
+<li>mount: unify masking as self-bind+RO, drop unused shared mask-dir tmpfs (29ae5da)
 </li>
-<li>docs: add CONTRIBUTING.md with project philosophy and submission guidelines (0d4d660)
+<li>feat: wire read-only bind mount flag to app (9c60d95)
 </li>
-<li>seccomp: block host clock modification syscalls (39fb8de)
+<li>mount: add :ro flag support for read-only bind mounts (7b97ff3)
 </li>
-<li>Merge branch 'main' into dev (f4c9277)
+<li>Translated using Weblate (#163) (b615530)
 </li>
-<li>utils: harden init detection for Nix-based and wrapper-script rootfs (3ef14b2)
+<li>More Shortened titles in Docs metadata (#162) (62e6306)
 </li>
-<li>docs: we hit the 400KB binary size limit :( (b0f8ad5)
+<li>Shortened titles in Docs metadata (#161) (921b99d)
 </li>
-<li>docs: added RISC-V 64 support to the supported architectures (4c045b9)
+<li>docs: move language switcher to the top of README (eb721a0)
 </li>
-<li>docs: remove deprecated UI credits for KernelSU-Next, MMRL, and LSPatch from README (68a873c)
+<li>post_extract_fixes: do not add ExecCondition to udev-related units (136ec2f)
 </li>
-<li>docs: rewrote Droidspaces comparison sections into a comprehensive table against alternatives (1300228)
+<li>fix: post_extract_fixes: guard udev socket units with hardware access limit (0d504ad)
 </li>
-<li>droidspaces.te: fixed a typo (5c4f40c)
+<li>ui: polish rootfs repository sheet and fix cosmetic bugs (a3cdcec)
 </li>
-<li>Merge pull request #138 from yoshi3jp/web (8716a9c)
+<li>Update translation files (#157) (2bbe25c)
 </li>
-<li>Translated using Weblate (Romanian) (#139) (3127eeb)
+<li>app: Rootfs Repository: use unique, metadata-derived filenames for rootfs assets to prevent download conflicts (c73586d)
 </li>
-<li>docs: add XFCE launch instructions and fix typos in SELinux policy documentation (e522f70)
+<li>Android: fix icon cache poisoning and stale state after container poweroff (b626078)
 </li>
-<li>nix: add nix documentation (#137) (2b19080)
+<li>seccomp: truly skip all filters when noseccomp is active (0ea180e)
 </li>
-<li>socketd: replace snapshot dummies with backend-backed JSON projections (53df9e7)
+<li>nix: finix: fix finix using wrong arch. improve compatibility with droidspaces (#159) (01ce155)
 </li>
-<li>socketd: add typed backend client methods for snapshot data (f99a8be)
+<li>docs: zh-CN: consolidate Simplified Chinese translations into singular folder (a5746c7)
 </li>
-<li>socketd: add core lifecycle event journal and polling opcode (3e7ce18)
+<li>Simplified Chinese Translation of Document (#158) (c931c5b)
 </li>
-<li>socketd: add backend pseudo-image inventory opcode (47be2d2)
+<li>app: Rootfs Repository: contextual empty state and hide banner while searching (009e08e)
 </li>
-<li>socketd: add backend info counters for container inventory (c71485a)
+<li>app: Rootfs Repository: filter rootfs assets based on detected device architecture (f81a350)
 </li>
-<li>socketd: implement backend container inventory opcode (93053ad)
+<li>app: add custom rootfs repo support (d98185a)
 </li>
-<li>Merge pull request #133 from yoshi3jp/web (cf823ca)
+<li>docs: add trailing spaces to markdown quick navigation lists for improved rendering (6629f0a)
 </li>
-<li>Merge branch 'main' into dev (4690c7f)
+<li>docs: add disclaimer warning to community-supported devices documentation (6ab10fa)
 </li>
-<li>socketd: satisfy Portainer snapshot probes and expose local events (8d13720)
+<li>fix: cancel terminal session notification upon service termination or empty session state (a5baa69)
 </li>
-<li>socketd: add dummy container list endpoint for Portainer probing (8f2baf4)
+<li>fix: add hostname sanitization and validation for container configuration menu (7c91bcf)
 </li>
-<li>socketd: expose initial TCP Docker-compatible discovery API (709f5cd)
+<li>app: Rootfs Repository: fix rootfs downloads saving with display name instead of filename (9b21332)
 </li>
-<li>Translated using Weblate (Chinese (Simplified Han script)) (#136) (bf38753)
+<li>app: removed unused strings (17c979c)
 </li>
-<li>nix: ignore power/suspend key events in logind (#135) (9308fa2)
+<li>app: add open-source repository banner to rootfs sheet (3e5f74b)
 </li>
-<li>fixup boot module version and versionCode (2885999)
+<li>app: Rootfs Repository: replace download count with build_date from JSON (c3c68a2)
 </li>
-<li>Nix: Fixing rootfs config, update nixpkgs, support for finix (#134) (347754e)
+<li>app: Rootfs Repository: adapt to new rootfs.json format (ecbffac)
 </li>
-<li>Web API skeleton (#132) (4131127)
+<li>fix: prevent Linux /dev breakage by restricting device pruning to Android environments (21ab8dc)
 </li>
-<li>fix(icons): clear OS info cache on container uninstall (1ccfc66)
+<li>fix: nuke container sessions before stop/restart (58b5973)
 </li>
-<li>feat(icons): prefetch distro icon on container start, cache forever, apply to all 3 card locations (141843e)
+<li>post_extract_fixes: restrict dhcpcd to NAT mode and whitelist eth interfaces to prevent Android network interference (b6c5cbc)
 </li>
-<li>feat(ui): synchronize container installer options and enhance UI consistency (3e3b027)
+<li>post_extract_fixes/docs: gate udev services behind hardware access config and update documentation (2d9c389)
 </li>
-<li>ui: unify distro icon fetching and clear stale cache on stop/restart (f402152)
+<li>Translated using Weblate (#153) (1f00fbb)
 </li>
-<li>feat(ui): add custom icons for 22 popular Linux distributions in container details (cfe0c7e)
+<li>app: fix cancel button not stopping DownloadManager download (dac54d4)
 </li>
-<li>ui: fix real-time IP updates and prevent stale data display on restart (802524a)
+<li>Added docs dispatch workflow to trigger web repo on Documentation changes (#156) (ef2dc4a)
 </li>
-<li>virt: fix frozen/drifting uptime across all kernel versions (c04446c)
+<li>Added metatags to Documentation (#155) (7dcbf04)
 </li>
-<li>Merge branch 'main' into dev (b0871d5)
+<li>Correct model number for two devices (#154) (a8f6100)
 </li>
-<li>Translated using Weblate (Chinese (Traditional Han script)) (#131) (91089e6)
+<li>app: use overflow-driven font auto-shrink for rootfs asset card names (544e358)
 </li>
-<li>app: add support for configuring a custom init binary for containers (5a4cf94)
+<li>app: implement rootfs repository browser and download manager for rootfs tarballs (65a042a)
 </li>
-<li>boot: add --init=PATH to override the default init binary (de4e15d)
+<li>app: add support for OpenRC init system management in the container info menu (d336534)
 </li>
-<li>virt: decouple resource visibility from cgroup limits (59160a4)
+<li>docs: added oppo reno10 devices to GKI support list (#152) (34a68b2)
 </li>
-<li>System-wide init family awareness (#129) (1660f6e)
+<li>docs: added Oneplus SM8250 devices to Non-GKI support list (#151) (5358ec6)
 </li>
-<li>Merge branch 'main' into dev (ff42b09)
+<li>Translated using Weblate (Khmer (Central), Portuguese) (#150) (ee10cc8)
 </li>
-<li>cgroup: disable virtualization when controllers are unavailable (fe3553c)
+<li>requirements: update kernel configuration to include TMPFS_POSIX_ACL and reorganize networking settings (9ab49f7)
 </li>
-<li>feat: add [VIRT] prefix support to message logging filter (c455b09)
+<li>Add machine-readable output support to show command (7c4864f)
 </li>
-<li>feat(virt): implement resource visibility virtualization (9802718)
+<li>docs: Fix duplicated 'https://' and format chart (#148) (5aeb895)
 </li>
-<li>cgroup: implement resource constraints via v2 delegation (84c4ca7)
-</li>
-<li>[daemon] add optional backend bridge for future socket API service (#110) (59e53d6)
-</li>
-<li>Add OnePlus SM8650(LineageOS) to community support devices list (#125) (e770d6f)
-</li>
-<li>Add Nothing Phone (1) to supported devices list (#126) (f5b557e)
+<li>docs: Update 5.10 GKI community supported devices (#147) (6220539)
 </li>
 </ul>
 <hr>
@@ -284,10 +278,10 @@
     <div class="container">
       <div class="section-label">Older Versions</div>
       <h2>Previous releases</h2>
-      <div class="table-wrap"><table><thead><tr><th>Version</th><th>Date</th><th></th></tr></thead><tbody><tr><td>Droidspaces v6.1.5</td><td>2026-05-15</td><td><a href="https://github.com/ravindu644/Droidspaces-OSS/releases/tag/v6.1.5" class="dl-secondary">Download</a></td></tr>
+      <div class="table-wrap"><table><thead><tr><th>Version</th><th>Date</th><th></th></tr></thead><tbody><tr><td>Droidspaces v6.2.0</td><td>2026-05-22</td><td><a href="https://github.com/ravindu644/Droidspaces-OSS/releases/tag/v6.2.0" class="dl-secondary">Download</a></td></tr>
+<tr><td>Droidspaces v6.1.5</td><td>2026-05-15</td><td><a href="https://github.com/ravindu644/Droidspaces-OSS/releases/tag/v6.1.5" class="dl-secondary">Download</a></td></tr>
 <tr><td>Musl Toolchains to compile Droidspaces</td><td>2026-05-14</td><td><a href="https://github.com/ravindu644/Droidspaces-OSS/releases/tag/compilers-25843896720" class="dl-secondary">Download</a></td></tr>
-<tr><td>Droidspaces v6.1.0</td><td>2026-05-13</td><td><a href="https://github.com/ravindu644/Droidspaces-OSS/releases/tag/v6.1.0" class="dl-secondary">Download</a></td></tr>
-<tr><td>Droidspaces v6.0.0</td><td>2026-04-24</td><td><a href="https://github.com/ravindu644/Droidspaces-OSS/releases/tag/v6.0.0" class="dl-secondary">Download</a></td></tr></tbody></table></div>
+<tr><td>Droidspaces v6.1.0</td><td>2026-05-13</td><td><a href="https://github.com/ravindu644/Droidspaces-OSS/releases/tag/v6.1.0" class="dl-secondary">Download</a></td></tr></tbody></table></div>
     </div>
   </section>
 </main>
