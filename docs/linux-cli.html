@@ -379,6 +379,7 @@
 <a href="kernel-configuration.html" class="sidebar-link">Kernel Configuration</a>
 <a href="usage-android-app.html" class="sidebar-link">Android App Usage</a>
 <a href="linux-cli.html" class="sidebar-link active">Linux CLI</a>
+<a href="networking-from-zero.html" class="sidebar-link">Networking From Zero</a>
 </div>
 <div class="sidebar-group">
 <div class="sidebar-heading">Recipes</div>
@@ -479,7 +480,6 @@ sudo droidspaces --name=web,db,app stop
 </thead>
 <tbody>
 <tr><td><code>--net=MODE</code></td><td></td><td>Networking mode: <code>host</code> (default), <code>nat</code>, or <code>none</code>.</td></tr>
-<tr><td><code>--upstream IFACE[,..]</code></td><td></td><td>Upstream internet interface(s) for NAT mode (e.g., <code>wlan0,rmnet0</code>). Wildcards are supported (e.g., <code>rmnet*</code>, <code>v4-rmnet_data*</code>). <strong>Mandatory for NAT</strong>.</td></tr>
 <tr><td><code>--port HOST:CONT[/proto]</code></td><td></td><td>Forward host port to container (NAT mode). Supports TCP/UDP.</td></tr>
 <tr><td><code>--dns=SERVERS</code></td><td><code>-d</code></td><td>Custom DNS servers, comma-separated. Example: <code>--dns=1.1.1.1,8.8.8.8</code></td></tr>
 <tr><td><code>--disable-ipv6</code></td><td></td><td>Disable IPv6 networking support (Host mode only).</td></tr>
@@ -593,7 +593,6 @@ foreground=0
   --name=server \
   --rootfs-img=/path/to/rootfs.img \
   --net=nat \
-  --upstream=wlan0,rmnet0 \
   --port=8080:80 \
   start
 </code></pre></div>
@@ -641,7 +640,7 @@ sudo droidspaces --name=dev-box --rootfs=/path/to/rootfs --privileged=nocaps,nos
 <li><a href="usage-android-app.html" rel="noopener noreferrer">Android App Usage Guide</a>
 </li>
 </ul>
-<div class="doc-nav-buttons"><a href="usage-android-app.html" class="doc-nav-btn doc-nav-prev">← Android App Usage</a><a href="cool-things-you-can-do.html" class="doc-nav-btn doc-nav-next">Cool Things You Can Do →</a></div>
+<div class="doc-nav-buttons"><a href="usage-android-app.html" class="doc-nav-btn doc-nav-prev">← Android App Usage</a><a href="networking-from-zero.html" class="doc-nav-btn doc-nav-next">Networking From Zero →</a></div>
       <p class="doc-copyright">&copy; 2026 Droidspaces &nbsp;·&nbsp; <a href="https://github.com/ravindu644/Droidspaces-OSS/blob/main/LICENSE" rel="noopener noreferrer">GPLv3</a> &nbsp;·&nbsp; by <a href="https://github.com/ravindu644" rel="noopener noreferrer">ravindu644</a> and <a href="https://github.com/ravindu644/Droidspaces-OSS/graphs/contributors" rel="noopener noreferrer">contributors</a>
 </p>
     </div>

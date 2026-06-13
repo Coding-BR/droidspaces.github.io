@@ -379,6 +379,7 @@
 <a href="kernel-configuration.html" class="sidebar-link">Kernel Configuration</a>
 <a href="usage-android-app.html" class="sidebar-link active">Android App Usage</a>
 <a href="linux-cli.html" class="sidebar-link">Linux CLI</a>
+<a href="networking-from-zero.html" class="sidebar-link">Networking From Zero</a>
 </div>
 <div class="sidebar-group">
 <div class="sidebar-heading">Recipes</div>
@@ -462,17 +463,8 @@
 <li><strong>None</strong>: No network access.
 </li>
 </ul>
-<h3 id="configuring-upstream-interfaces-nat-mode">Configuring Upstream Interfaces (NAT Mode)</h3>
-<p>If you select <strong>NAT (Isolated)</strong> mode, you <strong>must</strong> specify one or more upstream interfaces for the container to have internet access. The app provides a convenient auto-detection workflow:</p>
-<ol>
-<li><strong>Detect Wi-Fi</strong>: Connect to your Wi-Fi network and press the refresh button in the "Upstream Interfaces" menu. Select the interface (usually <code>wlan0</code>) that appears.
-</li>
-<li><strong>Detect Mobile Data</strong>: Disable Wi-Fi and connect to mobile data. Press the refresh button again and select the mobile data interface (e.g., <code>rmnet0</code>, <code>ccmni1</code>).
-</li>
-<li><strong>Save</strong>: Both interfaces will now be used by the Route Monitor to keep your container connected as you switch networks.
-</li>
-</ol>
-<div class="callout callout-tip"><strong class="callout-title">TIP</strong> You can manually enter wildcards in the Upstream Interfaces list (e.g., <code>rmnet*</code>) to ensure connectivity even if your carrier cycles through different interface names (like <code>rmnet_data0</code> and <code>rmnet_data1</code>).</div>
+<h3 id="internet-uplink-nat-mode">Internet Uplink (NAT Mode)</h3>
+<p>If you select <strong>NAT (Isolated)</strong> mode, the internet uplink is detected fully automatically - there is nothing to configure. Droidspaces reads the kernel's own routing state to find the interface Android is currently using for internet (Wi-Fi, mobile data, ethernet) and a background Route Monitor keeps the container connected in real time as you switch networks.</p>
 <div class="callout callout-note"><strong class="callout-title">NOTE</strong> NAT mode is IPv4 only. If your carrier only provides IPv6, see the <a href="troubleshooting.html#ipv4-quirks" rel="noopener noreferrer">IPv4 NAT Workaround</a>.</div>
 <h3 id="port-forwarding">Port Forwarding</h3>
 <p>In NAT mode, use the <strong>Port Forwarding</strong> section to map host ports to container ports (e.g., <code>22:22</code>). You can also specify <strong>port ranges</strong> (e.g., <code>1000-2000:1000-2000</code>) for services that require multiple contiguous ports.</p>

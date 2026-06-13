@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A beginner-friendly guide to every networking concept behind Droidspaces gateway mode - IP addresses, LAN, WAN, DHCP, DNS, NAT, bridges, veth pairs, network namespaces, and OpenWRT.">
+  <meta name="keywords" content="droidspaces, networking, gateway, openwrt, nat, dhcp, dns, lan, wan, veth, bridge, namespace, linux, android">
+  <title>Networking From Zero - Droidspaces Docs</title>
+  <meta property="og:title" content="Networking From Zero - Droidspaces Docs">
+  <meta property="og:description" content="A beginner-friendly guide to every networking concept behind Droidspaces gateway mode - IP addresses, LAN, WAN, DHCP, DNS, NAT, bridges, veth pairs, network namespaces, and OpenWRT.">
+  <meta property="og:url" content="https://www.droidspaces.org/docs/networking-from-zero.html">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://i.ibb.co/d4PLN7Gg/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Networking From Zero - Droidspaces Docs">
+  <meta name="twitter:description" content="A beginner-friendly guide to every networking concept behind Droidspaces gateway mode - IP addresses, LAN, WAN, DHCP, DNS, NAT, bridges, veth pairs, network namespaces, and OpenWRT.">
+  <meta name="twitter:image" content="https://i.ibb.co/d4PLN7Gg/og-image.png">
+  <link rel="canonical" href="https://www.droidspaces.org/docs/networking-from-zero.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/favicon.ico">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .docs-layout {
+      display: flex; min-height: calc(100vh - 56px);
+    }
+    .sidebar {
+      width: 300px; flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      background: var(--bg2);
+      overflow-y: auto;
+      position: sticky; top: 56px; height: calc(100vh - 56px);
+    }
+    .sidebar-inner {
+      padding: 0;
+      position: relative;
+      width: 100%;
+      min-width: 0;
+    }
+    .sidebar-group {
+      margin-bottom: 0;
+    }
+    .sidebar-heading {
+      font-family: var(--mono); font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); padding: 1rem 1rem 0.25rem;
+    }
+    .sidebar-link {
+      display: block; padding: 0.5rem 1rem;
+      font-size: 0.9rem; color: var(--muted);
+      text-decoration: none; border-radius: 0;
+      transition: all 0.1s;
+    }
+    .sidebar-link:hover {
+      color: var(--text); background: var(--bg3);
+    }
+    .sidebar-link.active {
+      color: var(--accent2); background: rgba(79,142,247,0.08);
+      font-weight: 600;
+    }
+    .sidebar-content {
+      flex: 1; min-width: 0;
+      padding: 2rem 2rem 4rem;
+      max-width: none;
+    }
+    .sidebar-content h1 {
+      font-family: var(--mono); font-size: clamp(1.5rem, 2.5vw, 2rem);
+      font-weight: 700; letter-spacing: -0.03em; color: var(--text);
+      margin-bottom: 1.5rem; padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-content h2 {
+      font-family: var(--mono); font-size: 1.25rem; font-weight: 700;
+      color: var(--text); margin: 2rem 0 0.75rem;
+      letter-spacing: -0.02em;
+    }
+    .sidebar-content h2:target {
+      border-left: 3px solid var(--accent);
+      padding-left: 0.75rem;
+    }
+    .sidebar-content h3 {
+      font-family: var(--mono); font-size: 1rem; font-weight: 600;
+      color: var(--accent2); margin: 1.5rem 0 0.5rem;
+    }
+    .sidebar-content h3:target {
+      border-left: 2px solid var(--accent);
+      padding-left: 0.5rem;
+    }
+    .sidebar-content p {
+      color: var(--muted); line-height: 1.7; margin-bottom: 1rem;
+    }
+    .sidebar-content strong { color: var(--text); }
+    .sidebar-content a {
+      color: var(--accent2); text-decoration: none;
+      word-break: break-word; overflow-wrap: anywhere;
+    }
+    .sidebar-content a:hover { text-decoration: underline; }
+    .sidebar-content code {
+      font-family: var(--mono); font-size: 0.82rem;
+      background: var(--bg3); padding: 0.15rem 0.4rem;
+      border-radius: 4px; color: var(--accent2);
+      word-break: break-word; overflow-wrap: anywhere;
+    }
+    .sidebar-content pre {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1rem; overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .sidebar-content pre code {
+      background: none; padding: 0; font-size: 0.78rem;
+      color: var(--text); line-height: 1.6;
+    }
+    .code-block {
+      position: relative;
+    }
+    .code-block:hover .copy-btn {
+      opacity: 1;
+    }
+    .copy-btn {
+      position: absolute; top: 0.5rem; right: 0.5rem;
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--muted); font-size: 0.7rem;
+      font-family: var(--sans); padding: 0.2rem 0.5rem;
+      border-radius: 4px; cursor: pointer;
+      opacity: 0; transition: opacity 0.15s; z-index: 1;
+      display: inline-flex; align-items: center; gap: 0.25rem;
+    }
+    .copy-btn:hover {
+      color: var(--accent2); border-color: var(--accent2);
+    }
+    @media (max-width: 768px) {
+      .copy-btn { opacity: 1; }
+    }
+    .sidebar-content ul, .sidebar-content ol {
+      color: var(--muted); line-height: 1.7;
+      margin-bottom: 1rem; padding-left: 1.25rem;
+    }
+    .sidebar-content li { margin-bottom: 0.25rem; }
+    .sidebar-content li > .code-block { margin-top: 0.5rem; }
+    .sidebar-content blockquote {
+      border-left: 3px solid var(--accent); background: var(--bg3);
+      padding: 0.75rem 1rem; margin-bottom: 1rem;
+      border-radius: 0 6px 6px 0;
+      color: var(--text); font-size: 0.9rem;
+    }
+    .sidebar-content blockquote p { color: var(--text); margin-bottom: 0; }
+    .sidebar-content hr {
+      border: none; border-top: 1px solid var(--border); margin: 2rem 0;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-bottom: 1.5rem;
+    }
+    .table-wrap table {
+      width: max-content;
+      min-width: 100%;
+      margin-bottom: 0;
+    }
+    .sidebar-content table {
+      width: max-content; min-width: 100%;
+      border-collapse: collapse; font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .sidebar-content th {
+      font-family: var(--mono); font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 0.75rem 1rem; text-align: left; color: var(--muted);
+      border-bottom: 1px solid var(--border); background: var(--bg3);
+      white-space: nowrap;
+    }
+    .sidebar-content td {
+      padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      white-space: normal; word-break: normal;
+      overflow-wrap: break-word; max-width: 300px;
+    }
+    .sidebar-content img {
+      max-width: 100%; border-radius: 8px; border: 1px solid var(--border);
+      margin: 1rem 0;
+    }
+    .sidebar-content details {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1rem; margin-bottom: 1rem;
+    }
+    .sidebar-content summary {
+      font-family: var(--mono); font-size: 0.85rem;
+      cursor: pointer; color: var(--accent2);
+    }
+    .callout {
+      border-left: 4px solid var(--accent);
+      background: var(--bg3); padding: 0.75rem 1rem;
+      margin-bottom: 1rem; border-radius: 0 6px 6px 0;
+      font-size: 0.9rem; color: var(--text);
+    }
+    .callout-title {
+      font-family: var(--mono); font-size: 0.72rem;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      display: block; margin-bottom: 0.25rem;
+    }
+    .callout-note { border-left-color: var(--accent); }
+    .callout-note .callout-title { color: var(--accent); }
+    .callout-tip { border-left-color: var(--green); }
+    .callout-tip .callout-title { color: var(--green); }
+    .callout-warning { border-left-color: #f59e0b; }
+    .callout-warning .callout-title { color: #f59e0b; }
+    .callout-caution { border-left-color: #f59e0b; }
+    .callout-caution .callout-title { color: #f59e0b; }
+    .callout-important { border-left-color: #ef4444; }
+    .callout-important .callout-title { color: #ef4444; }
+    .doc-nav-buttons {
+      display: flex; justify-content: space-between; gap: 1rem;
+      margin: 2rem 0 1rem;
+    }
+    .doc-nav-btn {
+      padding: 0.5rem 1rem; border-radius: 8px;
+      font-family: var(--sans); font-size: 0.82rem; font-weight: 500;
+      text-decoration: none; color: var(--muted);
+      border: 1px solid var(--border);
+      transition: all 0.15s; max-width: 50%;
+    }
+    .doc-nav-btn:hover {
+      color: var(--text); border-color: var(--muted);
+    }
+    .doc-nav-next {
+      margin-left: auto; text-align: right;
+    }
+    .doc-nav-prev {
+      text-align: left;
+    }
+    .doc-copyright {
+      font-size: 0.78rem; color: var(--border2);
+      padding-top: 1rem; border-top: 1px solid var(--border);
+      margin-top: 1.5rem; text-align: center;
+    }
+    .doc-copyright a {
+      color: var(--border2); text-decoration: none;
+    }
+    .doc-copyright a:hover {
+      color: var(--muted);
+    }
+    .nav-overlay {
+      display: none; position: fixed;
+      top: 56px; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 199;
+    }
+    .nav-overlay.active { display: block; }
+
+    .sidebar-close {
+      display: none;
+      position: absolute; top: 0.5rem; right: 1rem;
+      background: none; border: none;
+      color: var(--muted); font-size: 1.5rem;
+      cursor: pointer; padding: 0.25rem 0.5rem;
+      line-height: 1; border-radius: 4px;
+    }
+    .sidebar-close:hover {
+      color: var(--text); background: var(--bg3);
+    }
+
+    .doc-breadcrumb {
+      display: none;
+      position: sticky;
+      top: 56px;
+      z-index: 50;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.78rem;
+      color: var(--muted);
+      user-select: none;
+      cursor: pointer;
+    }
+    .doc-breadcrumb .bc-sep {
+      color: var(--border2);
+    }
+    .doc-breadcrumb .bc-section {
+      color: var(--text);
+    }
+    .doc-breadcrumb .bc-label {
+      color: var(--accent2);
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        display: flex;
+        position: fixed; top: 56px; left: 0;
+        width: 300px; height: calc(100dvh - 56px); z-index: 200;
+        border-right: 1px solid var(--border);
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        box-shadow: 4px 0 12px rgba(0,0,0,0.2);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-close { display: block; }
+      .sidebar-content { padding: 1.5rem 1rem 3rem; }
+      .doc-breadcrumb { display: flex; }
+      .docs-layout { flex-direction: column; }
+      .sidebar-content th,
+      .sidebar-content td {
+        padding: 0.5rem 0.5rem;
+        font-size: 0.78rem;
+      }
+    }
+  </style>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+</head>
+<body>
+    <nav aria-label="Main navigation">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;height:100%;">
+      <a href="/" class="nav-logo">
+        <svg class="logo-icon" viewBox="8.25 10.35 31.5 27.3" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M36.85 30.16H11.15c-0.82 0-1.48 0.68-1.48 1.52v3.05c0 0.84 0.66 1.52 1.48 1.52h25.69c0.82 0 1.48-0.68 1.48-1.52v-3.05c0-0.84-0.66-1.52-1.48-1.52ZM12.58 34.97c-0.95 0-1.73-0.79-1.73-1.77s0.77-1.77 1.73-1.77 1.73 0.79 1.73 1.77-0.77 1.77-1.73 1.77Z"/>
+          <path d="M36.85 21.00H11.15c-0.82 0-1.48 0.68-1.48 1.52v3.05c0 0.84 0.66 1.52 1.48 1.52h25.69c0.82 0 1.48-0.68 1.48-1.52v-3.05c0-0.84-0.66-1.52-1.48-1.52ZM12.58 25.82c-0.95 0-1.73-0.79-1.73-1.77s0.77-1.77 1.73-1.77 1.73 0.79 1.73 1.77-0.77 1.77-1.73 1.77Z"/>
+          <path d="M36.84 11.74H11.15c-0.82 0-1.48 0.68-1.48 1.52v3.05c0 0.84 0.66 1.52 1.48 1.52h25.69c0.82 0 1.48-0.68 1.48-1.52v-3.05c0-0.84-0.66-1.52-1.48-1.52ZM12.58 16.57c-0.95 0-1.73-0.79-1.73-1.77s0.77-1.77 1.73-1.77 1.73 0.79 1.73 1.77-0.77 1.77-1.73 1.77Z"/>
+        </svg>
+        <span class="logo-text">Droidspaces</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:0.5rem;">
+        <ul class="nav-links">
+          <li class="nav-features"><a href="/#features">Features</a></li>
+          <li><a href="/docs/" style="color:var(--accent2)"><i class="fas fa-book nav-icon nav-icon-docs"></i><span class="nav-label">Documentation</span></a></li>
+          <li class="nav-downloads"><a href="/downloads.html"><i class="fas fa-download nav-icon nav-icon-docs"></i><span class="nav-label">Downloads</span></a></li>
+          <li><a href="https://github.com/ravindu644/Droidspaces-OSS" rel="noopener noreferrer"><i class="fab fa-github nav-icon"></i><span class="nav-label nav-label-gt">GitHub</span></a></li>
+          <li><a href="https://t.me/Droidspaces" rel="noopener noreferrer"><i class="fab fa-telegram nav-icon"></i><span class="nav-label nav-label-gt">Telegram</span></a></li>
+        </ul>
+        <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="nav-overlay" id="sidebar-overlay"></div>
+
+  <div class="doc-breadcrumb" id="sidebar-toggle" role="button" tabindex="0" aria-label="Toggle docs navigation">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0">
+      <rect x="3" y="3" width="18" height="18" rx="2"/>
+      <line x1="9" y1="3" x2="9" y2="21"/>
+    </svg>
+    <span>Docs</span><span class="bc-sep">/</span><span class="bc-section">Guides</span><span class="bc-sep">/</span><span class="bc-label">Networking From Zero</span>
+  </div>
+
+  <div class="docs-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-inner">
+        <button class="sidebar-close" id="sidebar-close" aria-label="Close sidebar">&times;</button>
+<div class="sidebar-group">
+<div class="sidebar-heading">Basics</div>
+<a href="installation-android.html" class="sidebar-link">Android Installation</a>
+<a href="installation-linux.html" class="sidebar-link">Linux Installation</a>
+</div>
+<div class="sidebar-group">
+<div class="sidebar-heading">Guides</div>
+<a href="features.html" class="sidebar-link">Feature Deep Dives</a>
+<a href="graphics-and-audio.html" class="sidebar-link">Display, Audio & Desktop</a>
+<a href="kernel-configuration.html" class="sidebar-link">Kernel Configuration</a>
+<a href="usage-android-app.html" class="sidebar-link">Android App Usage</a>
+<a href="linux-cli.html" class="sidebar-link">Linux CLI</a>
+<a href="networking-from-zero.html" class="sidebar-link active">Networking From Zero</a>
+</div>
+<div class="sidebar-group">
+<div class="sidebar-heading">Recipes</div>
+<a href="cool-things-you-can-do.html" class="sidebar-link">Cool Things You Can Do</a>
+</div>
+<div class="sidebar-group">
+<div class="sidebar-heading">Reference</div>
+<a href="troubleshooting.html" class="sidebar-link">Troubleshooting</a>
+<a href="community-supported-devices.html" class="sidebar-link">Community-Supported Devices</a>
+<a href="nix-nixos.html" class="sidebar-link">Nix/NixOS</a>
+<a href="uninstallation.html" class="sidebar-link">Uninstallation</a>
+</div>
+      </div>
+    </aside>
+    <div class="sidebar-content">
+<h1 id="networking-from-zero-understanding-droidspaces-gateway-mode">Networking From Zero: Understanding Droidspaces Gateway Mode</h1>
+<h3 id="quick-navigation">Quick Navigation</h3>
+<ul>
+<li><a href="#part-1-the-absolute-basics" rel="noopener noreferrer">Part 1: The Absolute Basics</a>
+<ul>
+<li><a href="#what-is-an-ip-address" rel="noopener noreferrer">What is an IP address?</a>
+</li>
+<li><a href="#what-is-a-network" rel="noopener noreferrer">What is a network?</a>
+</li>
+<li><a href="#lan---local-area-network" rel="noopener noreferrer">LAN - Local Area Network</a>
+</li>
+<li><a href="#wan---wide-area-network" rel="noopener noreferrer">WAN - Wide Area Network</a>
+</li>
+<li><a href="#gateway" rel="noopener noreferrer">Gateway</a>
+</li>
+</ul>
+</li>
+<li><a href="#part-2-how-data-actually-gets-delivered" rel="noopener noreferrer">Part 2: How Data Actually Gets Delivered</a>
+<ul>
+<li><a href="#mac-address-vs-ip-address" rel="noopener noreferrer">MAC address vs IP address</a>
+</li>
+<li><a href="#what-is-a-packet" rel="noopener noreferrer">What is a packet?</a>
+</li>
+</ul>
+</li>
+<li><a href="#part-3-dhcp-how-you-get-an-ip-address" rel="noopener noreferrer">Part 3: DHCP (How You Get an IP Address)</a>
+</li>
+<li><a href="#part-4-dns-how-names-become-addresses" rel="noopener noreferrer">Part 4: DNS (How Names Become Addresses)</a>
+</li>
+<li><a href="#part-5-nat-the-magic-your-router-does" rel="noopener noreferrer">Part 5: NAT (The Magic Your Router Does)</a>
+<ul>
+<li><a href="#nat-in-droidspaces" rel="noopener noreferrer">NAT in Droidspaces</a>
+</li>
+</ul>
+</li>
+<li><a href="#part-6-bridges-and-virtual-cables-linux-plumbing" rel="noopener noreferrer">Part 6: Bridges and Virtual Cables (Linux Plumbing)</a>
+<ul>
+<li><a href="#what-is-a-network-bridge" rel="noopener noreferrer">What is a network bridge?</a>
+</li>
+<li><a href="#what-is-a-veth-pair" rel="noopener noreferrer">What is a veth pair?</a>
+</li>
+<li><a href="#how-nat-mode-uses-bridges-and-veths" rel="noopener noreferrer">How NAT mode uses bridges and veths</a>
+</li>
+</ul>
+</li>
+<li><a href="#part-7-network-namespaces-how-containers-are-isolated" rel="noopener noreferrer">Part 7: Network Namespaces (How Containers Are Isolated)</a>
+</li>
+<li><a href="#part-8-openwrt-and-what-it-is" rel="noopener noreferrer">Part 8: OpenWRT and What It Is</a>
+</li>
+<li><a href="#part-9-the-new-gateway-mode---putting-it-all-together" rel="noopener noreferrer">Part 9: The New Gateway Mode - Putting It All Together</a>
+<ul>
+<li><a href="#why-does-gateway-mode-exist" rel="noopener noreferrer">Why does gateway mode exist?</a>
+</li>
+<li><a href="#the-architecture" rel="noopener noreferrer">The architecture</a>
+</li>
+<li><a href="#step-by-step---what-happens-when-you-start-a-gateway-mode-container" rel="noopener noreferrer">Step by step - what happens when you start a gateway-mode container</a>
+</li>
+<li><a href="#what-lazy-attachment-means" rel="noopener noreferrer">What "lazy attachment" means</a>
+</li>
+<li><a href="#why-resolvconf-is-left-alone-in-gateway-mode" rel="noopener noreferrer">Why resolv.conf is left alone in gateway mode</a>
+</li>
+<li><a href="#why-bridge-nf-call-iptables-is-set-to-0" rel="noopener noreferrer">Why bridge-nf-call-iptables is set to 0</a>
+</li>
+<li><a href="#the-gateway-container-must-be-running-first" rel="noopener noreferrer">The gateway container must be running first</a>
+</li>
+<li><a href="#what-happens-when-containers-stop" rel="noopener noreferrer">What happens when containers stop</a>
+</li>
+</ul>
+</li>
+<li><a href="#part-10-gateway-mode-flags-and-configuration" rel="noopener noreferrer">Part 10: Gateway Mode Flags and Configuration</a>
+<ul>
+<li><a href="#required-vs-optional-flags" rel="noopener noreferrer">Required vs optional flags</a>
+</li>
+<li><a href="#what---gateway-net-does" rel="noopener noreferrer">What --gateway-net does</a>
+</li>
+<li><a href="#what---gateway-iface-does" rel="noopener noreferrer">What --gateway-iface does</a>
+</li>
+<li><a href="#the-flag-conflict-you-must-avoid" rel="noopener noreferrer">The flag conflict you must avoid</a>
+</li>
+<li><a href="#validation-rules-and-kernel-requirements" rel="noopener noreferrer">Validation rules and kernel requirements</a>
+</li>
+</ul>
+</li>
+<li><a href="#part-11-comparing-all-networking-modes" rel="noopener noreferrer">Part 11: Comparing All Networking Modes</a>
+</li>
+<li><a href="#part-12-real-world-use-cases-for-gateway-mode" rel="noopener noreferrer">Part 12: Real-World Use Cases for Gateway Mode</a>
+</li>
+<li><a href="#quick-reference---terms" rel="noopener noreferrer">Quick Reference - Terms</a>
+</li>
+</ul>
+<hr>
+<h2 id="part-1-the-absolute-basics">Part 1: The Absolute Basics</h2>
+<h3 id="what-is-an-ip-address">What is an IP address?</h3>
+<p>Every device that wants to talk over a network needs an address so other devices know where to send data. That address is called an <strong>IP address</strong>.</p>
+<p>Think of it like a house address. If someone wants to mail you a letter, they need your address. Same idea: if your phone wants to send data to Google, it needs to know Google's address, and Google needs to know your phone's address to send the reply back.</p>
+<p>An IP address looks like this: <code>192.168.1.5</code></p>
+<p>It is four numbers (0-255) separated by dots. Each number is called an <strong>octet</strong>.</p>
+<h3 id="what-is-a-network">What is a network?</h3>
+<p>A <strong>network</strong> is just a group of devices that can talk to each other directly.</p>
+<p>Imagine a room with 5 laptops all connected to the same Wi-Fi router. Those 5 laptops are on the same network. They can send files to each other without going through the internet.</p>
+<h3 id="lan-local-area-network">LAN - Local Area Network</h3>
+<p><strong>LAN</strong> = the network <em>inside your home</em> (or office, or in our case, <em>inside the container world</em>).</p>
+<p>It is called "local" because it is physically nearby: your phone, laptop, smart TV, all connected to your home Wi-Fi router. They all live on the same LAN. They can talk to each other directly.</p>
+<p>LAN addresses usually look like: - <code>192.168.x.x</code> - <code>10.x.x.x</code> - <code>172.16.x.x</code> to <code>172.31.x.x</code></p>
+<p>These are called <strong>private IP ranges</strong>. They are reserved for local networks and are never used on the public internet.</p>
+<h3 id="wan-wide-area-network">WAN - Wide Area Network</h3>
+<p><strong>WAN</strong> = the network <em>outside your home</em>: the internet itself.</p>
+<p>Your router has two sides: - The <strong>LAN side</strong> faces your devices at home - The <strong>WAN side</strong> faces your internet provider (ISP)</p>
+<p>Your ISP gives your router one public IP address for the WAN side. Everything inside your home shares that one public IP to reach the internet.</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>[Your Phone]--+
+[Your Laptop]-+--[Router]--[ISP]--[The Internet]
+[Your TV]-----+
+  (LAN side)     (WAN side)
+</code></pre></div>
+<h3 id="gateway">Gateway</h3>
+<p>A <strong>gateway</strong> is the device that connects two different networks together.</p>
+<p>In your home, the router <em>is</em> the gateway. Your phone's IP is <code>192.168.1.5</code> (LAN). When your phone wants to reach Google at <code>142.250.80.46</code> (WAN/internet), it does not know how to get there directly. So it sends the data to the gateway (router), and the router figures out how to forward it to the internet.</p>
+<p><strong>Rule:</strong> Every device on a LAN is configured with a "default gateway" - the address they send all traffic to when they do not know where else to send it.</p>
+<hr>
+<h2 id="part-2-how-data-actually-gets-delivered">Part 2: How Data Actually Gets Delivered</h2>
+<h3 id="mac-address-vs-ip-address">MAC address vs IP address</h3>
+<p>There are actually <em>two</em> kinds of addresses in networking:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Type</th><th>Looks like</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>IP address</strong></td><td><code>192.168.1.5</code></td><td>Logical address - used for routing across networks</td></tr>
+<tr><td><strong>MAC address</strong></td><td><code>a4:c3:f0:12:34:56</code></td><td>Physical address - used for delivery on the <em>same</em> network</td></tr>
+</tbody>
+</table></div>
+<p>Think of it this way: - The IP address is the <strong>city and street</strong> - used to navigate across the country - The MAC address is the <strong>apartment number</strong> - used once you arrive at the building</p>
+<p>When your laptop sends a packet to your router, it uses the router's MAC address (because they are on the same LAN). The router then uses IP addresses to figure out where to send it next.</p>
+<h3 id="what-is-a-packet">What is a packet?</h3>
+<p>Data traveling over a network is broken into small chunks called <strong>packets</strong>. Each packet contains: - Where it came from (source IP) - Where it is going (destination IP) - A small piece of the actual data</p>
+<p>The network reassembles all the packets at the destination.</p>
+<hr>
+<h2 id="part-3-dhcp-how-you-get-an-ip-address">Part 3: DHCP (How You Get an IP Address)</h2>
+<h3 id="the-problem">The problem</h3>
+<p>Every device needs an IP address to join a network. But you cannot have two devices with the same IP - that would be like two houses with the same postal address. Mail would get lost.</p>
+<p>You <em>could</em> manually assign a unique IP to every device, but that is painful. What if you have 50 devices?</p>
+<h3 id="the-solution-dhcp">The solution: DHCP</h3>
+<p><strong>DHCP</strong> = Dynamic Host Configuration Protocol</p>
+<p>It is a system where one device (the <strong>DHCP server</strong>) automatically hands out IP addresses to every new device that joins the network.</p>
+<p>The conversation goes like this:</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>New Device:   "Hello? Anyone there? I just joined this network and I need an IP address."
+DHCP Server:  "I heard you. Here, take 192.168.1.42. Also, your gateway is 192.168.1.1,
+               and for DNS use 1.1.1.1. Your lease lasts 24 hours."
+New Device:   "Got it, thanks!"
+</code></pre></div>
+<p>The new device now has everything it needs to work on the network: - Its own IP address - The gateway address (so it knows where to send traffic) - The DNS address (explained next)</p>
+<p>In your home, the <strong>router runs the DHCP server</strong>. It hands out IPs to every device that connects.</p>
+<p>In <strong>Droidspaces NAT mode</strong>, Droidspaces itself runs a mini DHCP server that hands the container its IP (in the <code>172.28.x.x</code> range). The IP is deterministic: it is derived from the container's name, persisted to its config file, and offered again on every boot, so the same container always keeps the same address across restarts.</p>
+<hr>
+<h2 id="part-4-dns-how-names-become-addresses">Part 4: DNS (How Names Become Addresses)</h2>
+<h3 id="the-problem">The problem</h3>
+<p>IP addresses are hard to remember. Nobody types <code>142.250.80.46</code> when they want to visit Google. They type <code>google.com</code>.</p>
+<p>But computers only understand IP addresses. So there needs to be a system that converts human-readable names to IP addresses.</p>
+<h3 id="the-solution-dns">The solution: DNS</h3>
+<p><strong>DNS</strong> = Domain Name System</p>
+<p>It is basically the internet's phone book. You give it a name (<code>google.com</code>), it gives you back an IP address (<code>142.250.80.46</code>).</p>
+<p>The conversation:</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>Your Browser:   "What is the IP address of google.com?"
+DNS Server:     "It is 142.250.80.46"
+Your Browser:   "Thanks." [now connects to 142.250.80.46]
+</code></pre></div>
+<p>Every device is configured with a DNS server address. In most home networks, the router <em>is</em> the DNS server (it forwards your questions to your ISP's DNS or a public one like <code>1.1.1.1</code>).</p>
+<p>In <strong>Droidspaces NAT mode</strong>, Droidspaces writes a <code>resolv.conf</code> file inside the container pointing to a DNS server (default <code>1.1.1.1</code> and <code>8.8.8.8</code>, or whatever you pass via <code>--dns</code>). The same DNS servers are also advertised inside the DHCP lease itself.</p>
+<hr>
+<h2 id="part-5-nat-the-magic-your-router-does">Part 5: NAT (The Magic Your Router Does)</h2>
+<h3 id="the-problem">The problem</h3>
+<p>Your ISP gives you <em>one</em> public IP address. But you have 10 devices at home. How do all 10 devices use the internet at the same time?</p>
+<h3 id="the-solution-nat">The solution: NAT</h3>
+<p><strong>NAT</strong> = Network Address Translation</p>
+<p>Your router keeps a secret table. When a device inside your LAN sends a packet to the internet, the router: 1. Rewrites the source IP from the device's private IP (<code>192.168.1.5</code>) to the router's public IP 2. Remembers which device sent it 3. When the reply comes back from the internet, rewrites the destination back to the device's private IP and forwards it</p>
+<p>From the internet's perspective, all your home devices appear to be <em>one device</em>: the router.</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>[Laptop: 192.168.1.5] --sends packet--> [Router]
+                                          |
+                                          | rewrites source to public IP
+                                          v
+                                     [Internet]
+                                          |
+                                          | reply comes back
+                                          v
+                                     [Router]
+                                          |
+                                          | rewrites destination back to 192.168.1.5
+                                          v
+                              [Laptop: 192.168.1.5]
+</code></pre></div>
+<h3 id="nat-in-droidspaces">NAT in Droidspaces</h3>
+<p>In Droidspaces NAT mode, Droidspaces acts <em>exactly like your home router</em> - but for containers:</p>
+<ul>
+<li>The container gets a private IP (<code>172.28.x.x</code>)
+</li>
+<li>Droidspaces installs iptables <code>MASQUERADE</code> rules (that is the Linux name for the NAT target), plus FORWARD-accept and MSS-clamp rules so traffic actually flows
+</li>
+<li>The container can reach the internet; the internet sees Android's IP, not the container's IP
+</li>
+<li>Droidspaces also runs an embedded DHCP server for the container and configures its DNS
+</li>
+<li>On Android, a background route monitor detects the active internet uplink automatically (by reading the kernel's routing rules) and re-points container traffic the moment the active network changes (for example, Wi-Fi to mobile data handoff)
+</li>
+</ul>
+<hr>
+<h2 id="part-6-bridges-and-virtual-cables-linux-plumbing">Part 6: Bridges and Virtual Cables (Linux Plumbing)</h2>
+<p>Now we go one level deeper, into how Linux actually connects containers to each other.</p>
+<h3 id="what-is-a-network-bridge">What is a network bridge?</h3>
+<p>A <strong>network bridge</strong> works like a network switch. A physical network switch is a box you plug multiple ethernet cables into; all devices connected to it can talk to each other.</p>
+<p>A Linux <strong>bridge</strong> is a virtual switch, entirely in software. You can create it with a command, and then "plug" virtual network interfaces into it.</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>Physical world:           Linux world:
++--------------+          +--------------+
+|   Switch     |          |   Bridge     |  (software, no physical box)
+| port1  port2 |          | port1  port2 |
++--+------+---+          +--+------+---+
+   |      |                  |      |
+[PC1]  [PC2]           [veth1]  [veth2]   (virtual cables)
+</code></pre></div>
+<h3 id="what-is-a-veth-pair">What is a veth pair?</h3>
+<p><strong>veth</strong> = virtual ethernet</p>
+<p>A veth pair is a pair of virtual network interfaces that are connected to each other like a pipe. Anything you send into one end comes out the other end.</p>
+<p>Think of it as a virtual ethernet cable with two plugs. You put one plug inside a container, and the other plug stays on the host (or goes into a bridge).</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>[Container netns]          [Host netns]
+     eth0 --------------------- ds-veth0
+  (plug inside container)   (plug on host side)
+</code></pre></div>
+<h3 id="how-nat-mode-uses-bridges-and-veths">How NAT mode uses bridges and veths</h3>
+<p>In Droidspaces NAT mode:</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>[Container netns]
+     eth0 (e.g. 172.28.137.42)
+      |
+      | veth pair (virtual cable)
+      |
+[Host side]
+     ds-v<PID> ---- ds-br0 (bridge, has IP 172.28.0.1)
+                          |
+                     iptables MASQUERADE
+                          |
+                      wlan0 / rmnet0
+                     (Android's real network)
+</code></pre></div>
+<p>The bridge <code>ds-br0</code> owns the gateway IP <code>172.28.0.1</code>, which every NAT container uses as its default gateway. The veth pair is named after the container's init process ID: the host side is <code>ds-v<PID></code>, and the container side starts life as <code>ds-p<PID></code> before being renamed to <code>eth0</code> inside the container.</p>
+<p>Droidspaces runs a small per-container DHCP server listening on the container's host-side veth. The whole <code>172.28.0.0/16</code> subnet belongs to Droidspaces (the <code>172.28.0.x</code> row is reserved for the gateway itself, so containers always land in <code>172.28.1.x</code> through <code>172.28.254.x</code>), and everything from it is NATted out through Android's real interface.</p>
+<hr>
+<h2 id="part-7-network-namespaces-how-containers-are-isolated">Part 7: Network Namespaces (How Containers Are Isolated)</h2>
+<h3 id="what-is-a-namespace">What is a namespace?</h3>
+<p>Linux has a feature called <strong>namespaces</strong> that lets you create isolated views of system resources.</p>
+<p>A <strong>network namespace</strong> is an isolated copy of the entire networking stack. It has its own: - Network interfaces - Routing table - iptables rules - Everything networking-related</p>
+<p>When Droidspaces starts a container, it creates a new network namespace for it. The container lives in that namespace. It cannot see the host's network interfaces at all - only what Droidspaces explicitly puts inside its namespace.</p>
+<p>The veth pair is the tunnel between the host's namespace and the container's namespace: - One end of the veth goes inside the container's network namespace (appears as <code>eth0</code>) - The other end stays in the host's network namespace (Droidspaces connects it to a bridge)</p>
+<hr>
+<h2 id="part-8-openwrt-and-what-it-is">Part 8: OpenWRT and What It Is</h2>
+<h3 id="what-is-openwrt">What is OpenWRT?</h3>
+<p><strong>OpenWRT</strong> is a Linux distribution designed specifically for routers. Normally it runs on physical router hardware, but it can also run on a regular Linux system or inside a container.</p>
+<p>When OpenWRT is running, it provides: - <strong>netifd</strong> - network interface daemon (manages network interfaces, DHCP client/server, etc.) - <strong>dnsmasq</strong> - DNS and DHCP server - <strong>firewall3</strong> or <strong>nftables</strong> - firewall - <strong>LuCI</strong> - web UI for configuration - Everything a real router does, in software</p>
+<p>This means you can run OpenWRT inside a Droidspaces container, and it will behave exactly like a real router: managing networks, handing out DHCP leases, doing DNS, applying firewall rules, routing VPN traffic, etc.</p>
+<hr>
+<h2 id="part-9-the-new-gateway-mode-putting-it-all-together">Part 9: The New Gateway Mode - Putting It All Together</h2>
+<h3 id="why-does-gateway-mode-exist">Why does gateway mode exist?</h3>
+<p>In NAT mode, Droidspaces is the router. It does everything. This is fine for most cases.</p>
+<p>But what if you want <strong>OpenWRT to be the router</strong> for other containers? You want OpenWRT's firewall rules, OpenWRT's DHCP, OpenWRT's VPN routing, and you want other containers (like a Kali Linux container) to be on OpenWRT's LAN, getting everything from OpenWRT.</p>
+<p>The problem: if Droidspaces also tries to install NAT, DHCP, and DNS for those containers, it will <em>conflict</em> with what OpenWRT is trying to do. Two DHCP servers fighting over who gives the IP address. Two firewalls applying contradictory rules.</p>
+<p><strong>Gateway mode solves this.</strong> Droidspaces steps back. It only does the L2 plumbing (the virtual cables and switch), and lets OpenWRT own all the policy: DHCP, DNS, firewall, routing.</p>
+<h3 id="the-architecture">The architecture</h3>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>Android host kernel
+|
++-- wlan0 (Android's real Wi-Fi - WAN)
+|
++-- [OpenWRT container - net=nat mode]
+|    netns: owns eth0 (WAN, gets NAT from Droidspaces)
+|           eth1 (LAN side - plugged into ds-lan bridge by gateway mode)
+|    Runs: dnsmasq, netifd, firewall, VPN
+|
++-- ds-lan (host bridge - NO IP address, just a switch)
+|    |
+|    +-- ds-g[hash] (veth host-side, connected to OpenWRT's netns as eth1)
+|    +-- ds-v[pid]  (veth host-side, connected to Kali's netns as eth0)
+|
++-- [Kali container - net=gateway mode]
+     netns: owns eth0 (LAN side - plugged into ds-lan bridge)
+     Gets DHCP from OpenWRT's dnsmasq
+     Routing decisions made by OpenWRT
+     Firewall rules applied by OpenWRT
+</code></pre></div>
+<h3 id="step-by-step-what-happens-when-you-start-a-gateway-mode-container">Step by step - what happens when you start a gateway-mode container</h3>
+<p><strong>Step 1 - You start OpenWRT first (in NAT mode)</strong></p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>droidspaces --name=openwrt --rootfs=/data/openwrt --net=nat start
+</code></pre></div>
+<p>OpenWRT boots. It has: - <code>eth0</code> on the WAN side (Droidspaces manages NAT for this) - No LAN side yet - OpenWRT is waiting for one</p>
+<p><strong>Step 2 - You start Kali (in gateway mode)</strong></p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>droidspaces --name=kali --rootfs=/data/kali --net=gateway --gateway=openwrt start
+</code></pre></div>
+<p>Droidspaces does the following (only plumbing, no policy):</p>
+<ol>
+<li>Finds OpenWRT's running process ID so it can reach its network namespace
+</li>
+<li>Creates a bridge called <code>ds-lan</code> on the host with no IP address on it
+</li>
+<li>Disables <code>bridge-nf-call-iptables</code> so Android's host firewall does NOT intercept traffic on this bridge, keeping OpenWRT's firewall as the only authority
+</li>
+<li>Creates a veth pair for OpenWRT's LAN side - one end goes into OpenWRT's netns (appears as <code>eth1</code>), the other end plugs into the <code>ds-lan</code> bridge
+</li>
+<li>Creates a veth pair for Kali - one end goes into Kali's netns (appears as <code>eth0</code>), the other end plugs into the <code>ds-lan</code> bridge
+</li>
+<li>Does NOT install NAT, DHCP, DNS, or any firewall rules
+</li>
+</ol>
+<p><strong>Step 3 - OpenWRT takes over</strong></p>
+<p>OpenWRT's <code>netifd</code> detects that <code>eth1</code> appeared. It configures it as the LAN interface. OpenWRT's <code>dnsmasq</code> starts answering DHCP requests on <code>eth1</code>.</p>
+<p>Kali's <code>eth0</code> sends a DHCP request and OpenWRT's <code>dnsmasq</code> replies with: - IP address: <code>192.168.1.100</code> (or whatever OpenWRT's DHCP range is) - Gateway: <code>192.168.1.1</code> (OpenWRT itself) - DNS: <code>192.168.1.1</code> (OpenWRT's dnsmasq)</p>
+<p>Kali is now fully configured, with OpenWRT as its router.</p>
+<p><strong>Step 4 - Traffic flows through OpenWRT</strong></p>
+<p>When Kali tries to reach the internet:</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>Kali eth0 --> ds-lan bridge --> OpenWRT eth1
+                                      |
+                              OpenWRT firewall rules applied here
+                                      |
+                              OpenWRT routes to eth0 (WAN)
+                                      |
+                              Droidspaces NAT (eth0 -> wlan0)
+                                      |
+                                  Android wlan0 --> Internet
+</code></pre></div>
+<p>OpenWRT's firewall sees all of Kali's traffic and can apply any rules: block certain sites, redirect through VPN, shape bandwidth, log connections - exactly like a real router would.</p>
+<h3 id="what-lazy-attachment-means">What "lazy attachment" means</h3>
+<p>The gateway veth is "lazily attached." This means:</p>
+<ul>
+<li>When you start OpenWRT, it does NOT immediately get an <code>eth1</code>
+</li>
+<li><code>eth1</code> only appears inside OpenWRT <strong>when the first gateway-mode container starts</strong>
+</li>
+<li>This is intentional - OpenWRT boots with just its WAN side (<code>eth0</code>), and its LAN cable (<code>eth1</code>) is plugged in later, on demand
+</li>
+</ul>
+<p>This mimics how you might physically plug a cable into a router's LAN port after the router is already running.</p>
+<h3 id="why-resolvconf-is-left-alone-in-gateway-mode">Why resolv.conf is left alone in gateway mode</h3>
+<p>In NAT mode, Droidspaces writes <code>/etc/resolv.conf</code> inside the container, pointing to <code>1.1.1.1</code> or <code>8.8.8.8</code>.</p>
+<p>In gateway mode, Droidspaces does NOT write <code>resolv.conf</code> (unless you explicitly pass <code>--dns</code>). This is because OpenWRT's <code>dnsmasq</code> hands the DNS server address to the container via the DHCP lease. If Droidspaces also wrote a <code>resolv.conf</code>, it would conflict with what dnsmasq is providing - the container would use the wrong DNS and bypass OpenWRT's DNS filtering/caching entirely.</p>
+<h3 id="why-bridge-nf-call-iptables-is-set-to-0">Why bridge-nf-call-iptables is set to 0</h3>
+<p>The bridge <code>ds-lan</code> carries traffic between OpenWRT and Kali. By default, Linux can pass bridged traffic through the host's iptables. This would mean Android's iptables rules (which might drop or NAT things unexpectedly) would interfere with traffic that OpenWRT is supposed to be managing.</p>
+<p>Setting it to <code>0</code> tells Linux: "do not run iptables on bridged traffic." This keeps OpenWRT's firewall as the <em>only</em> firewall that sees this traffic, which is exactly what we want.</p>
+<h3 id="the-gateway-container-must-be-running-first">The gateway container must be running first</h3>
+<p>Start order matters. When a gateway-mode container starts, Droidspaces looks up the gateway container's live process ID to reach its network namespace. If the gateway container is not running at that moment, the network setup fails with a warning and the client container boots anyway - but with no network at all (only loopback). It does not retry on its own.</p>
+<p>The same logic applies after a gateway restart. A veth pair dies together: when the gateway container stops, the <code>eth1</code> end inside it is destroyed, and that destroys the host-side end too. Existing clients stay plugged into the bridge but have no router anymore. The LAN cable is re-plugged the next time <strong>any</strong> gateway-mode container starts on that segment - so after restarting the gateway, restart one client (or start a new one) to bring the segment back to life.</p>
+<h3 id="what-happens-when-containers-stop">What happens when containers stop</h3>
+<p>Cleanup in gateway mode is deliberately minimal, matching the "plumbing only" philosophy:</p>
+<ul>
+<li><strong>A client stops:</strong> only that client's own veth (<code>ds-v<PID></code>) is removed. The bridge and the gateway's <code>eth1</code> stay up, so other clients on the segment are untouched.
+</li>
+<li><strong>The gateway stops:</strong> the gateway-side veth disappears with its namespace (see above), but the bridge itself stays.
+</li>
+<li>The delegated bridge (<code>ds-lan</code> etc.) is never torn down by Droidspaces. It is harmless when idle - it has no IP and carries no policy - and persists until you delete it manually or reboot the device.
+</li>
+</ul>
+<hr>
+<h2 id="part-10-gateway-mode-flags-and-configuration">Part 10: Gateway Mode Flags and Configuration</h2>
+<h3 id="required-vs-optional-flags">Required vs optional flags</h3>
+<p>Only <strong>one flag is mandatory</strong> when using <code>--net=gateway</code>:</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>--gateway=<container_name>
+</code></pre></div>
+<p>If you omit it, Droidspaces will print an error and refuse to start. Everything else has a working default:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Flag</th><th>Default</th><th>What it controls</th></tr>
+</thead>
+<tbody>
+<tr><td><code>--gateway=NAME</code></td><td><em>(none - required)</em></td><td>Which running container is the router</td></tr>
+<tr><td><code>--gateway-net=NAME</code></td><td><code>lan</code></td><td>The LAN segment name - see below</td></tr>
+<tr><td><code>--gateway-iface=IFACE</code></td><td><code>eth1</code></td><td>Interface name inside the gateway container</td></tr>
+<tr><td><code>--gateway-bridge=BR</code></td><td><code>ds-{gateway-net}</code></td><td>Override the host bridge name entirely</td></tr>
+</tbody>
+</table></div>
+<p>So the minimal valid command is:</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>droidspaces --name=client --net=gateway --gateway=openwrt start
+</code></pre></div>
+<p>That is identical to spelling out all defaults explicitly:</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>droidspaces --name=client --net=gateway --gateway=openwrt \
+  --gateway-net=lan \
+  --gateway-iface=eth1 \
+  start
+</code></pre></div>
+<h3 id="what-gateway-net-does">What --gateway-net does</h3>
+<p>This flag controls two things at once, both derived from the same name.</p>
+<p><strong>1. It names the host bridge.</strong></p>
+<p>The bridge Droidspaces creates on the host is named <code>ds-{NAME}</code>:</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>--gateway-net=lan   ->  host bridge: ds-lan
+--gateway-net=vpn   ->  host bridge: ds-vpn
+--gateway-net=iot   ->  host bridge: ds-iot
+</code></pre></div>
+<p><strong>2. It is the segment identifier - which bridge clients land on.</strong></p>
+<p>The veth names for the gateway's LAN side are generated by hashing the string <code>{gateway_container}:{gateway_net}</code> together. The same hash = the same veth = the same bridge segment. This means multiple client containers that share the same <code>--gateway</code> and <code>--gateway-net</code> all end up on the same bridge, and all get DHCP from the same OpenWRT interface.</p>
+<p>This is the real power of <code>--gateway-net</code>: running multiple isolated LAN segments through the same gateway container.</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code># These two land on ds-lan - they see each other, OpenWRT routes them as one LAN
+droidspaces --name=kali   --net=gateway --gateway=openwrt --gateway-net=lan start
+droidspaces --name=ubuntu --net=gateway --gateway=openwrt --gateway-net=lan start
+
+# This one lands on ds-vpn - a completely separate bridge
+# OpenWRT can apply different firewall/VPN rules to this segment
+droidspaces --name=torbox --net=gateway --gateway=openwrt --gateway-net=vpn start
+</code></pre></div>
+<p>Inside OpenWRT, the <code>lan</code> clients come in on <code>eth1</code> and the <code>vpn</code> clients come in on <code>eth2</code> (each segment gets its own veth, because the hash of <code>openwrt:lan</code> and <code>openwrt:vpn</code> are different).</p>
+<h3 id="what-gateway-iface-does">What --gateway-iface does</h3>
+<p>This controls <strong>what the LAN interface is called inside the gateway container's network namespace</strong>.</p>
+<p>When Droidspaces creates the gateway veth for a segment, it moves one end into OpenWRT's netns and renames it from its raw hash name (<code>ds-hXXXXXXXX</code>) to whatever you pass here (default <code>eth1</code>).</p>
+<p><strong>Why does this matter?</strong> OpenWRT's configuration is built around interface names. If your OpenWRT <code>/etc/config/network</code> says:</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code>config interface 'lan'
+    option device 'eth1'
+</code></pre></div>
+<p>...then the interface that appears inside OpenWRT <strong>must</strong> be named <code>eth1</code>, or OpenWRT will not recognize it as its LAN and will not serve DHCP on it. <code>--gateway-iface=eth1</code> makes that happen.</p>
+<p>For a second segment you would pass <code>--gateway-iface=eth2</code> so OpenWRT sees it as a separate interface and you can add a second UCI network block for it.</p>
+<p><strong>Important detail:</strong> <code>--gateway-iface</code> only has any effect when the gateway veth for that segment is being created for the first time - which is when the very first client container on that segment starts. The gateway veth is shared by all clients on the same <code>--gateway-net</code>; it is created once and reused. Every client after the first one skips the gateway veth creation entirely and just wires its own app veth into the existing bridge.</p>
+<p>This means if you start two containers on <code>--gateway-net=lan</code> and both pass <code>--gateway-iface=eth1</code>, it works perfectly fine: the first container creates the veth and renames it <code>eth1</code>, the second container sees the veth already exists and does nothing with <code>--gateway-iface</code> at all.</p>
+<h3 id="the-flag-conflict-you-must-avoid">The flag conflict you must avoid</h3>
+<p>The problem only happens when you use <strong>two different <code>--gateway-net</code> segments but the same <code>--gateway-iface</code></strong>:</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code># segment 1 - creates eth1 inside OpenWRT
+droidspaces --name=kali   --net=gateway --gateway=openwrt --gateway-net=lan --gateway-iface=eth1 start
+
+# segment 2 - WRONG: also tries to create eth1 inside OpenWRT
+droidspaces --name=torbox --net=gateway --gateway=openwrt --gateway-net=vpn --gateway-iface=eth1 start
+</code></pre></div>
+<p>When the second command runs, Droidspaces tries to move a new veth peer into OpenWRT and rename it <code>eth1</code>. But <code>eth1</code> already exists inside OpenWRT from the first segment. Instead of failing loudly, the code detects the conflict and just brings the existing <code>eth1</code> up again, leaving the new veth peer with its raw hash name (<code>ds-hYYYYYYYY</code>) inside OpenWRT. OpenWRT has no config for <code>ds-hYYYYYYYY</code> and silently ignores it. The <code>vpn</code> segment gets no gateway-side interface: no DHCP, no routing, containers on it are effectively isolated.</p>
+<p><strong>The rule:</strong> every <code>--gateway-net</code> segment must have a unique <code>--gateway-iface</code> name.</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button><pre><code># Correct: two segments, two interface names
+--gateway-net=lan  --gateway-iface=eth1   ->  eth1 inside OpenWRT (LAN segment)
+--gateway-net=vpn  --gateway-iface=eth2   ->  eth2 inside OpenWRT (VPN segment)
+</code></pre></div>
+<h3 id="validation-rules-and-kernel-requirements">Validation rules and kernel requirements</h3>
+<p>Droidspaces enforces a few rules at startup and refuses to boot if they are violated:</p>
+<ul>
+<li>A container cannot use <strong>itself</strong> as its gateway (<code>--gateway</code> must name a different container)
+</li>
+<li>Interface and bridge names must be shorter than 16 characters (the Linux <code>IFNAMSIZ</code> limit) and may only contain letters, digits, <code>_</code>, and <code>-</code>
+</li>
+<li>The kernel must support network namespaces (<code>CONFIG_NET_NS</code>), veth pairs (<code>CONFIG_VETH</code>), and bridges (<code>CONFIG_BRIDGE</code>). Droidspaces probes for all three before starting and exits with a fatal error if any is missing
+</li>
+</ul>
+<p>Two more things to know:</p>
+<ul>
+<li><code>--port</code> only makes sense in NAT mode. In gateway mode it is ignored with a warning - port forwarding and uplink selection are the gateway container's job now.
+</li>
+<li>When the host bridge name is auto-derived from <code>--gateway-net</code>, the name is sanitized (only letters, digits, <code>_</code>, <code>-</code> survive) and truncated to 9 characters, producing <code>ds-</code> plus at most 9 characters. If you need an exact bridge name, set it explicitly with <code>--gateway-bridge</code>.
+</li>
+</ul>
+<hr>
+<h2 id="part-11-comparing-all-networking-modes">Part 11: Comparing All Networking Modes</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Feature</th><th>NAT Mode</th><th>Host Mode</th><th>None Mode</th><th>Gateway Mode</th></tr>
+</thead>
+<tbody>
+<tr><td>Who assigns IPs?</td><td>Droidspaces DHCP</td><td>Android (shared)</td><td>Nobody (loopback only)</td><td>OpenWRT dnsmasq</td></tr>
+<tr><td>Who does NAT?</td><td>Droidspaces iptables</td><td>Android</td><td>N/A</td><td>OpenWRT (via Droidspaces NAT on OpenWRT's WAN)</td></tr>
+<tr><td>Who manages firewall?</td><td>Droidspaces</td><td>Android</td><td>N/A</td><td>OpenWRT</td></tr>
+<tr><td>Who manages DNS?</td><td>Droidspaces</td><td>Android</td><td>Nobody</td><td>OpenWRT dnsmasq</td></tr>
+<tr><td>Container isolated from host network?</td><td>Yes</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Internet access?</td><td>Yes</td><td>Yes</td><td>No</td><td>Yes (via gateway container)</td></tr>
+<tr><td>Needs a second container to function?</td><td>No</td><td>No</td><td>No</td><td>Yes (the gateway container)</td></tr>
+<tr><td>Good for</td><td>Simple internet access</td><td>Maximum performance, zero overhead</td><td>Offline / sandboxed workloads</td><td>Router appliance, VPN gateway, segmented LANs</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h2 id="part-12-real-world-use-cases-for-gateway-mode">Part 12: Real-World Use Cases for Gateway Mode</h2>
+<h3 id="1-vpn-killswitch-for-specific-containers">1. VPN killswitch for specific containers</h3>
+<p>Run OpenWRT with a WireGuard or OpenVPN client. Configure OpenWRT's firewall to drop all traffic that does not go through the VPN tunnel. Any container using gateway mode will be unable to leak traffic outside the VPN - OpenWRT enforces it at the bridge level, not inside the individual containers.</p>
+<h3 id="2-multiple-isolated-lan-segments">2. Multiple isolated LAN segments</h3>
+<p>Use <code>--gateway-net</code> to create separate segments on the same OpenWRT. Containers on <code>--gateway-net=lan</code> cannot reach containers on <code>--gateway-net=vpn</code> unless OpenWRT explicitly routes between them. You get VLAN-style isolation with a single gateway container.</p>
+<h3 id="3-traffic-analysis">3. Traffic analysis</h3>
+<p>Run OpenWRT with <code>tcpdump</code> or <code>nftables</code> logging enabled. Every packet from every gateway-mode container flows through OpenWRT, so you get a single chokepoint to observe all network activity across multiple containers at once.</p>
+<h3 id="4-custom-dns-filtering">4. Custom DNS filtering</h3>
+<p>Run OpenWRT with a <code>dnsmasq</code> blocklist (or with Adblock installed via opkg). Every container on the gateway LAN gets filtered DNS without touching each container individually.</p>
+<h3 id="5-bandwidth-shaping">5. Bandwidth shaping</h3>
+<p>OpenWRT's <code>tc</code> (traffic control) and <code>sqm-scripts</code> can shape bandwidth per container, since OpenWRT sees each container as a separate MAC address arriving on its LAN interface.</p>
+<hr>
+<h2 id="quick-reference-terms">Quick Reference - Terms</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Term</th><th>One-line definition</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>IP address</strong></td><td>The numerical address of a device on a network (e.g. <code>192.168.1.5</code>)</td></tr>
+<tr><td><strong>MAC address</strong></td><td>The hardware address of a network interface, used for delivery within the same network</td></tr>
+<tr><td><strong>LAN</strong></td><td>Local network - devices near each other that can talk directly</td></tr>
+<tr><td><strong>WAN</strong></td><td>Wide network - the internet, outside your local network</td></tr>
+<tr><td><strong>Gateway</strong></td><td>A device that connects two networks and routes traffic between them</td></tr>
+<tr><td><strong>DHCP</strong></td><td>Protocol for automatically assigning IP addresses to devices</td></tr>
+<tr><td><strong>DNS</strong></td><td>System that converts human-readable names (<code>google.com</code>) to IP addresses</td></tr>
+<tr><td><strong>NAT</strong></td><td>Technique for sharing one public IP across many private-IP devices</td></tr>
+<tr><td><strong>Bridge</strong></td><td>A virtual (or physical) switch that connects multiple network interfaces</td></tr>
+<tr><td><strong>veth pair</strong></td><td>A pair of virtual network interfaces connected like a pipe - what goes in one end comes out the other</td></tr>
+<tr><td><strong>Network namespace</strong></td><td>An isolated copy of the Linux networking stack - containers live in their own namespace</td></tr>
+<tr><td><strong>OpenWRT</strong></td><td>A Linux distro designed to run as a router/gateway - runs dnsmasq, netifd, firewall</td></tr>
+<tr><td><strong>netifd</strong></td><td>OpenWRT's network interface daemon - manages interfaces and DHCP</td></tr>
+<tr><td><strong>dnsmasq</strong></td><td>Lightweight DHCP and DNS server used by OpenWRT</td></tr>
+<tr><td><strong>MASQUERADE</strong></td><td>The Linux iptables rule that implements NAT (rewrites source IPs)</td></tr>
+<tr><td><strong>Delegated LAN</strong></td><td>The bridge network Droidspaces creates in gateway mode - policy owned by the gateway container, not Droidspaces</td></tr>
+<tr><td><strong>Segment</strong></td><td>One isolated LAN identified by <code>--gateway-net</code> - each segment gets its own bridge and its own interface inside the gateway container</td></tr>
+<tr><td><strong>Lazy attachment</strong></td><td>The gateway's LAN-side veth is only created when the first client container starts, not when the gateway container starts</td></tr>
+</tbody>
+</table></div>
+<div class="doc-nav-buttons"><a href="linux-cli.html" class="doc-nav-btn doc-nav-prev">← Linux CLI</a><a href="cool-things-you-can-do.html" class="doc-nav-btn doc-nav-next">Cool Things You Can Do →</a></div>
+      <p class="doc-copyright">&copy; 2026 Droidspaces &nbsp;·&nbsp; <a href="https://github.com/ravindu644/Droidspaces-OSS/blob/main/LICENSE" rel="noopener noreferrer">GPLv3</a> &nbsp;·&nbsp; by <a href="https://github.com/ravindu644" rel="noopener noreferrer">ravindu644</a> and <a href="https://github.com/ravindu644/Droidspaces-OSS/graphs/contributors" rel="noopener noreferrer">contributors</a>
+</p>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const themeToggle = document.getElementById('theme-toggle');
+      const sunIcon = themeToggle.querySelector('.sun-icon');
+      const moonIcon = themeToggle.querySelector('.moon-icon');
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+      function updateIcons(theme) {
+        sunIcon.style.display = theme === 'light' ? 'none' : 'block';
+        moonIcon.style.display = theme === 'light' ? 'block' : 'none';
+      }
+      function getEffectiveTheme() {
+        const saved = localStorage.getItem('theme');
+        if (saved) return saved;
+        return mediaQuery.matches ? 'light' : 'dark';
+      }
+      function applyTheme(theme) {
+        if (theme === 'system') {
+          document.documentElement.removeAttribute('data-theme');
+          updateIcons(mediaQuery.matches ? 'light' : 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', theme);
+          updateIcons(theme);
+        }
+      }
+      applyTheme(getEffectiveTheme());
+      mediaQuery.addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'light' : 'dark');
+      });
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = getEffectiveTheme();
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+      });
+      // Docs sidebar toggle
+      const sidebarToggle = document.getElementById('sidebar-toggle');
+      const sidebar = document.getElementById('sidebar');
+      const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+      function openSidebar() {
+        sidebar.classList.add('open');
+        sidebarOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (sidebar.classList.contains('open')) closeSidebar();
+          else openSidebar();
+        });
+      }
+
+      if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeSidebar);
+      }
+
+      const sidebarClose = document.getElementById('sidebar-close');
+      if (sidebarClose) {
+        sidebarClose.addEventListener('click', closeSidebar);
+      }
+
+      if (sidebar) {
+        sidebar.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', closeSidebar);
+        });
+      }
+    })();
+    function copyCode(btn) {
+      const code = btn.parentElement.querySelector('pre code');
+      const text = code.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(() => { btn.innerHTML = orig; }, 1500);
+      }).catch(() => {});
+    }
+  </script>
+</body>
+</html>
